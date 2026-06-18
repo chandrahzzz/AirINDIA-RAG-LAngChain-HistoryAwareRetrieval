@@ -1,0 +1,324 @@
+Air India domestic (within India) route network (source: domestic route map, Feb 2025).
+Air India serves these 47 domestic (within India) destinations: Ahmedabad, Amritsar, Aurangabad, Bagdogra, Bengaluru, Bhopal, Bhuj, Bhubaneswar, Chandigarh, Chennai, Coimbatore, Dehradun, Delhi, Dibrugarh, Goa (GOI & GOX), Guwahati, Hyderabad, Imphal, Indore, Jaipur, Jamnagar, Jammu, Jodhpur, Kochi, Kolkata, Leh, Lucknow, Madurai, Mangaluru, Mumbai, Nagpur, Patna, Port Blair, Prayagraj, Pune, Raipur, Rajkot, Ranchi, Silchar, Srinagar, Thiruvananthapuram, Tirupati, Udaipur, Vadodara, Varanasi, Vijayawada, Visakhapatnam.
+Direct routes shown on the map:
+- Ahmedabad to Bhopal.
+- Ahmedabad to Bhuj.
+- Ahmedabad to Chennai.
+- Ahmedabad to Coimbatore.
+- Ahmedabad to Delhi.
+- Ahmedabad to Goa (GOI & GOX).
+- Ahmedabad to Hyderabad.
+- Ahmedabad to Indore.
+- Ahmedabad to Jaipur.
+- Ahmedabad to Jamnagar.
+- Ahmedabad to Kochi.
+- Ahmedabad to Kolkata.
+- Ahmedabad to Madurai.
+- Ahmedabad to Mangaluru.
+- Ahmedabad to Mumbai.
+- Ahmedabad to Nagpur.
+- Ahmedabad to Pune.
+- Ahmedabad to Raipur.
+- Ahmedabad to Rajkot.
+- Ahmedabad to Thiruvananthapuram.
+- Ahmedabad to Udaipur.
+- Ahmedabad to Vadodara.
+- Amritsar to Delhi.
+- Amritsar to Jammu.
+- Amritsar to Mumbai.
+- Aurangabad to Delhi.
+- Aurangabad to Hyderabad.
+- Aurangabad to Mumbai.
+- Bagdogra to Delhi.
+- Bagdogra to Guwahati.
+- Bagdogra to Kolkata.
+- Bagdogra to Mumbai.
+- Bengaluru to Chennai.
+- Bengaluru to Coimbatore.
+- Bengaluru to Delhi.
+- Bengaluru to Goa (GOI & GOX).
+- Bengaluru to Hyderabad.
+- Bengaluru to Kochi.
+- Bengaluru to Kolkata.
+- Bengaluru to Madurai.
+- Bengaluru to Mangaluru.
+- Bengaluru to Mumbai.
+- Bengaluru to Port Blair.
+- Bengaluru to Pune.
+- Bengaluru to Thiruvananthapuram.
+- Bengaluru to Tirupati.
+- Bengaluru to Vijayawada.
+- Bengaluru to Visakhapatnam.
+- Bhopal to Delhi.
+- Bhopal to Hyderabad.
+- Bhopal to Indore.
+- Bhopal to Mumbai.
+- Bhopal to Nagpur.
+- Bhopal to Raipur.
+- Bhopal to Vadodara.
+- Bhuj to Jamnagar.
+- Bhuj to Mumbai.
+- Bhuj to Rajkot.
+- Bhubaneswar to Delhi.
+- Bhubaneswar to Hyderabad.
+- Bhubaneswar to Kolkata.
+- Bhubaneswar to Mumbai.
+- Bhubaneswar to Port Blair.
+- Bhubaneswar to Ranchi.
+- Bhubaneswar to Visakhapatnam.
+- Chandigarh to Delhi.
+- Chandigarh to Mumbai.
+- Chennai to Coimbatore.
+- Chennai to Delhi.
+- Chennai to Goa (GOI & GOX).
+- Chennai to Hyderabad.
+- Chennai to Kochi.
+- Chennai to Kolkata.
+- Chennai to Madurai.
+- Chennai to Mangaluru.
+- Chennai to Mumbai.
+- Chennai to Port Blair.
+- Chennai to Pune.
+- Chennai to Thiruvananthapuram.
+- Chennai to Tirupati.
+- Chennai to Vijayawada.
+- Chennai to Visakhapatnam.
+- Coimbatore to Delhi.
+- Coimbatore to Goa (GOI & GOX).
+- Coimbatore to Kochi.
+- Coimbatore to Madurai.
+- Coimbatore to Mangaluru.
+- Coimbatore to Mumbai.
+- Coimbatore to Pune.
+- Coimbatore to Thiruvananthapuram.
+- Dehradun to Delhi.
+- Dehradun to Mumbai.
+- Delhi to Dibrugarh.
+- Delhi to Guwahati.
+- Delhi to Imphal.
+- Delhi to Jaipur.
+- Delhi to Jammu.
+- Delhi to Jodhpur.
+- Delhi to Kochi.
+- Delhi to Kolkata.
+- Delhi to Leh.
+- Delhi to Lucknow.
+- Delhi to Madurai.
+- Delhi to Mangaluru.
+- Delhi to Mumbai.
+- Delhi to Nagpur.
+- Delhi to Patna.
+- Delhi to Port Blair.
+- Delhi to Prayagraj.
+- Delhi to Pune.
+- Delhi to Raipur.
+- Delhi to Ranchi.
+- Delhi to Silchar.
+- Delhi to Srinagar.
+- Delhi to Thiruvananthapuram.
+- Delhi to Tirupati.
+- Delhi to Udaipur.
+- Delhi to Vadodara.
+- Delhi to Varanasi.
+- Delhi to Vijayawada.
+- Delhi to Visakhapatnam.
+- Dibrugarh to Guwahati.
+- Dibrugarh to Imphal.
+- Dibrugarh to Kolkata.
+- Dibrugarh to Mumbai.
+- Goa (GOI & GOX) to Hyderabad.
+- Goa (GOI & GOX) to Kochi.
+- Goa (GOI & GOX) to Madurai.
+- Goa (GOI & GOX) to Mangaluru.
+- Goa (GOI & GOX) to Mumbai.
+- Goa (GOI & GOX) to Pune.
+- Goa (GOI & GOX) to Thiruvananthapuram.
+- Goa (GOI & GOX) to Tirupati.
+- Goa (GOI & GOX) to Vijayawada.
+- Goa (GOI & GOX) to Visakhapatnam.
+- Guwahati to Imphal.
+- Guwahati to Kolkata.
+- Guwahati to Mumbai.
+- Guwahati to Silchar.
+- Hyderabad to Kochi.
+- Hyderabad to Kolkata.
+- Hyderabad to Lucknow.
+- Hyderabad to Madurai.
+- Hyderabad to Mangaluru.
+- Hyderabad to Mumbai.
+- Hyderabad to Nagpur.
+- Hyderabad to Patna.
+- Hyderabad to Port Blair.
+- Hyderabad to Prayagraj.
+- Hyderabad to Pune.
+- Hyderabad to Raipur.
+- Hyderabad to Ranchi.
+- Hyderabad to Thiruvananthapuram.
+- Hyderabad to Tirupati.
+- Hyderabad to Varanasi.
+- Hyderabad to Vijayawada.
+- Hyderabad to Visakhapatnam.
+- Imphal to Kolkata.
+- Imphal to Mumbai.
+- Imphal to Silchar.
+- Indore to Mumbai.
+- Indore to Nagpur.
+- Indore to Raipur.
+- Indore to Vadodara.
+- Jaipur to Jodhpur.
+- Jaipur to Mumbai.
+- Jaipur to Udaipur.
+- Jamnagar to Mumbai.
+- Jamnagar to Rajkot.
+- Jammu to Leh.
+- Jammu to Mumbai.
+- Jammu to Srinagar.
+- Jodhpur to Mumbai.
+- Kochi to Madurai.
+- Kochi to Mangaluru.
+- Kochi to Mumbai.
+- Kochi to Pune.
+- Kochi to Thiruvananthapuram.
+- Kolkata to Lucknow.
+- Kolkata to Mumbai.
+- Kolkata to Patna.
+- Kolkata to Port Blair.
+- Kolkata to Prayagraj.
+- Kolkata to Ranchi.
+- Kolkata to Silchar.
+- Kolkata to Varanasi.
+- Kolkata to Vijayawada.
+- Kolkata to Visakhapatnam.
+- Leh to Mumbai.
+- Leh to Srinagar.
+- Lucknow to Mumbai.
+- Lucknow to Patna.
+- Lucknow to Prayagraj.
+- Lucknow to Varanasi.
+- Madurai to Mangaluru.
+- Madurai to Mumbai.
+- Madurai to Pune.
+- Madurai to Thiruvananthapuram.
+- Mangaluru to Mumbai.
+- Mangaluru to Pune.
+- Mangaluru to Thiruvananthapuram.
+- Mumbai to Nagpur.
+- Mumbai to Patna.
+- Mumbai to Port Blair.
+- Mumbai to Prayagraj.
+- Mumbai to Pune.
+- Mumbai to Raipur.
+- Mumbai to Rajkot.
+- Mumbai to Ranchi.
+- Mumbai to Silchar.
+- Mumbai to Srinagar.
+- Mumbai to Thiruvananthapuram.
+- Mumbai to Tirupati.
+- Mumbai to Udaipur.
+- Mumbai to Vadodara.
+- Mumbai to Varanasi.
+- Mumbai to Vijayawada.
+- Mumbai to Visakhapatnam.
+- Nagpur to Raipur.
+- Patna to Prayagraj.
+- Patna to Ranchi.
+- Patna to Varanasi.
+- Port Blair to Silchar.
+- Port Blair to Visakhapatnam.
+- Prayagraj to Varanasi.
+- Pune to Thiruvananthapuram.
+- Pune to Tirupati.
+- Pune to Vijayawada.
+- Pune to Visakhapatnam.
+- Rajkot to Vadodara.
+- Ranchi to Visakhapatnam.
+- Srinagar to Leh.
+- Thiruvananthapuram to Tirupati.
+- Thiruvananthapuram to Vijayawada.
+- Thiruvananthapuram to Visakhapatnam.
+- Tirupati to Vijayawada.
+- Tirupati to Visakhapatnam.
+- Vijayawada to Visakhapatnam.
+Air India operates Jammu to Delhi flights on Sundays and does not operate Delhi to Jammu flights.
+Map not to scale. The depiction and use of routes and boundaries are for informative purposes only.
+Route map as on 23rd January 2025.
+
+Air India international route network (source: international route map, Feb 2025).
+Air India serves these 54 international destinations: AMS, CPH, FRA, MXP, CDG, VIE, ZRH, BHX, LHR, LGW, ORD, EWR, JFK, SFO, YYZ, YVR, IAD, AUH, DMM, DOH, DXB, JED, MCT, RUH, TLV, HKG, ICN, NRT, DPS, BKK, SGN, KUL, HKT, SIN, CMB, DAC, KTM, MLE, RGN, MRU, NBO, MEL, SYD, ATQ, AMD, BOM, PNQ, DEL, GOX, BLR, HYD, MAA, COK, CCU.
+Direct routes shown on the map:
+- DEL to AMS.
+- DEL to CPH.
+- DEL to FRA.
+- BOM to FRA.
+- DEL to MXP.
+- DEL to CDG.
+- DEL to VIE.
+- DEL to ZRH.
+- DEL to BHX.
+- ATQ to BHX.
+- DEL to LHR.
+- BOM to LHR.
+- BLR to LHR.
+- ATQ to LGW.
+- AMD to LGW.
+- GOX to LGW.
+- COK to LGW.
+- DEL to ORD.
+- DEL to EWR.
+- BOM to EWR.
+- DEL to JFK.
+- BOM to JFK.
+- DEL to SFO.
+- BOM to SFO.
+- BLR to SFO.
+- DEL to YYZ.
+- DEL to YVR.
+- DEL to IAD.
+- BOM to AUH.
+- BOM to DMM.
+- DEL to DOH.
+- BOM to DOH.
+- COK to DOH.
+- DEL to DXB.
+- BOM to DXB.
+- COK to DXB.
+- HYD to DXB.
+- MAA to DXB.
+- DEL to JED.
+- BOM to JED.
+- BOM to MCT.
+- DEL to RUH.
+- BOM to RUH.
+- DEL to TLV.
+- DEL to HKG.
+- DEL to ICN.
+- DEL to NRT.
+- DEL to DPS.
+- DEL to BKK.
+- BOM to BKK.
+- DEL to SGN.
+- DEL to KUL.
+- DEL to HKT.
+- DEL to SIN.
+- BOM to SIN.
+- BLR to SIN.
+- MAA to SIN.
+- PNQ to SIN.
+- DEL to CMB.
+- BOM to CMB.
+- MAA to CMB.
+- DEL to DAC.
+- BOM to DAC.
+- DEL to KTM.
+- DEL to MLE.
+- BOM to MLE.
+- DEL to RGN.
+- BOM to MRU.
+- DEL to NBO.
+- DEL to MEL.
+- BOM to MEL.
+- DEL to SYD.
+Air India flies non-stop to 42 destinations across five continents from multiple Indian cities (pinned on the map of India).
+Map not to scale. The depiction and use of routes and boundaries are for informative purposes only.
+Flights to Tel Aviv will restart effective 2nd March 2025.
+Route map as on 23rd January 2025.

@@ -1,0 +1,1011 @@
+{
+  "scope": "domestic",
+  "destinations": [
+    "Ahmedabad",
+    "Amritsar",
+    "Aurangabad",
+    "Bagdogra",
+    "Bengaluru",
+    "Bhopal",
+    "Bhuj",
+    "Bhubaneswar",
+    "Chandigarh",
+    "Chennai",
+    "Coimbatore",
+    "Dehradun",
+    "Delhi",
+    "Dibrugarh",
+    "Goa (GOI & GOX)",
+    "Guwahati",
+    "Hyderabad",
+    "Imphal",
+    "Indore",
+    "Jaipur",
+    "Jamnagar",
+    "Jammu",
+    "Jodhpur",
+    "Kochi",
+    "Kolkata",
+    "Leh",
+    "Lucknow",
+    "Madurai",
+    "Mangaluru",
+    "Mumbai",
+    "Nagpur",
+    "Patna",
+    "Port Blair",
+    "Prayagraj",
+    "Pune",
+    "Raipur",
+    "Rajkot",
+    "Ranchi",
+    "Silchar",
+    "Srinagar",
+    "Thiruvananthapuram",
+    "Tirupati",
+    "Udaipur",
+    "Vadodara",
+    "Varanasi",
+    "Vijayawada",
+    "Visakhapatnam"
+  ],
+  "routes": [
+    {
+      "from": "Ahmedabad",
+      "to": "Bhopal"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Bhuj"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Chennai"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Coimbatore"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Delhi"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Goa (GOI & GOX)"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Hyderabad"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Indore"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Jaipur"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Jamnagar"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Kochi"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Madurai"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Nagpur"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Pune"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Raipur"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Rajkot"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Udaipur"
+    },
+    {
+      "from": "Ahmedabad",
+      "to": "Vadodara"
+    },
+    {
+      "from": "Amritsar",
+      "to": "Delhi"
+    },
+    {
+      "from": "Amritsar",
+      "to": "Jammu"
+    },
+    {
+      "from": "Amritsar",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Aurangabad",
+      "to": "Delhi"
+    },
+    {
+      "from": "Aurangabad",
+      "to": "Hyderabad"
+    },
+    {
+      "from": "Aurangabad",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Bagdogra",
+      "to": "Delhi"
+    },
+    {
+      "from": "Bagdogra",
+      "to": "Guwahati"
+    },
+    {
+      "from": "Bagdogra",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Bagdogra",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Chennai"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Coimbatore"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Delhi"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Goa (GOI & GOX)"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Hyderabad"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Kochi"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Madurai"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Port Blair"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Pune"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Tirupati"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Bengaluru",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Bhopal",
+      "to": "Delhi"
+    },
+    {
+      "from": "Bhopal",
+      "to": "Hyderabad"
+    },
+    {
+      "from": "Bhopal",
+      "to": "Indore"
+    },
+    {
+      "from": "Bhopal",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Bhopal",
+      "to": "Nagpur"
+    },
+    {
+      "from": "Bhopal",
+      "to": "Raipur"
+    },
+    {
+      "from": "Bhopal",
+      "to": "Vadodara"
+    },
+    {
+      "from": "Bhuj",
+      "to": "Jamnagar"
+    },
+    {
+      "from": "Bhuj",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Bhuj",
+      "to": "Rajkot"
+    },
+    {
+      "from": "Bhubaneswar",
+      "to": "Delhi"
+    },
+    {
+      "from": "Bhubaneswar",
+      "to": "Hyderabad"
+    },
+    {
+      "from": "Bhubaneswar",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Bhubaneswar",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Bhubaneswar",
+      "to": "Port Blair"
+    },
+    {
+      "from": "Bhubaneswar",
+      "to": "Ranchi"
+    },
+    {
+      "from": "Bhubaneswar",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Chandigarh",
+      "to": "Delhi"
+    },
+    {
+      "from": "Chandigarh",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Chennai",
+      "to": "Coimbatore"
+    },
+    {
+      "from": "Chennai",
+      "to": "Delhi"
+    },
+    {
+      "from": "Chennai",
+      "to": "Goa (GOI & GOX)"
+    },
+    {
+      "from": "Chennai",
+      "to": "Hyderabad"
+    },
+    {
+      "from": "Chennai",
+      "to": "Kochi"
+    },
+    {
+      "from": "Chennai",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Chennai",
+      "to": "Madurai"
+    },
+    {
+      "from": "Chennai",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Chennai",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Chennai",
+      "to": "Port Blair"
+    },
+    {
+      "from": "Chennai",
+      "to": "Pune"
+    },
+    {
+      "from": "Chennai",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Chennai",
+      "to": "Tirupati"
+    },
+    {
+      "from": "Chennai",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Chennai",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Coimbatore",
+      "to": "Delhi"
+    },
+    {
+      "from": "Coimbatore",
+      "to": "Goa (GOI & GOX)"
+    },
+    {
+      "from": "Coimbatore",
+      "to": "Kochi"
+    },
+    {
+      "from": "Coimbatore",
+      "to": "Madurai"
+    },
+    {
+      "from": "Coimbatore",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Coimbatore",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Coimbatore",
+      "to": "Pune"
+    },
+    {
+      "from": "Coimbatore",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Dehradun",
+      "to": "Delhi"
+    },
+    {
+      "from": "Dehradun",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Delhi",
+      "to": "Dibrugarh"
+    },
+    {
+      "from": "Delhi",
+      "to": "Guwahati"
+    },
+    {
+      "from": "Delhi",
+      "to": "Imphal"
+    },
+    {
+      "from": "Delhi",
+      "to": "Jaipur"
+    },
+    {
+      "from": "Delhi",
+      "to": "Jammu"
+    },
+    {
+      "from": "Delhi",
+      "to": "Jodhpur"
+    },
+    {
+      "from": "Delhi",
+      "to": "Kochi"
+    },
+    {
+      "from": "Delhi",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Delhi",
+      "to": "Leh"
+    },
+    {
+      "from": "Delhi",
+      "to": "Lucknow"
+    },
+    {
+      "from": "Delhi",
+      "to": "Madurai"
+    },
+    {
+      "from": "Delhi",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Delhi",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Delhi",
+      "to": "Nagpur"
+    },
+    {
+      "from": "Delhi",
+      "to": "Patna"
+    },
+    {
+      "from": "Delhi",
+      "to": "Port Blair"
+    },
+    {
+      "from": "Delhi",
+      "to": "Prayagraj"
+    },
+    {
+      "from": "Delhi",
+      "to": "Pune"
+    },
+    {
+      "from": "Delhi",
+      "to": "Raipur"
+    },
+    {
+      "from": "Delhi",
+      "to": "Ranchi"
+    },
+    {
+      "from": "Delhi",
+      "to": "Silchar"
+    },
+    {
+      "from": "Delhi",
+      "to": "Srinagar"
+    },
+    {
+      "from": "Delhi",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Delhi",
+      "to": "Tirupati"
+    },
+    {
+      "from": "Delhi",
+      "to": "Udaipur"
+    },
+    {
+      "from": "Delhi",
+      "to": "Vadodara"
+    },
+    {
+      "from": "Delhi",
+      "to": "Varanasi"
+    },
+    {
+      "from": "Delhi",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Delhi",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Dibrugarh",
+      "to": "Guwahati"
+    },
+    {
+      "from": "Dibrugarh",
+      "to": "Imphal"
+    },
+    {
+      "from": "Dibrugarh",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Dibrugarh",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Hyderabad"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Kochi"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Madurai"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Pune"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Tirupati"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Goa (GOI & GOX)",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Guwahati",
+      "to": "Imphal"
+    },
+    {
+      "from": "Guwahati",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Guwahati",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Guwahati",
+      "to": "Silchar"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Kochi"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Lucknow"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Madurai"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Nagpur"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Patna"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Port Blair"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Prayagraj"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Pune"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Raipur"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Ranchi"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Tirupati"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Varanasi"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Hyderabad",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Imphal",
+      "to": "Kolkata"
+    },
+    {
+      "from": "Imphal",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Imphal",
+      "to": "Silchar"
+    },
+    {
+      "from": "Indore",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Indore",
+      "to": "Nagpur"
+    },
+    {
+      "from": "Indore",
+      "to": "Raipur"
+    },
+    {
+      "from": "Indore",
+      "to": "Vadodara"
+    },
+    {
+      "from": "Jaipur",
+      "to": "Jodhpur"
+    },
+    {
+      "from": "Jaipur",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Jaipur",
+      "to": "Udaipur"
+    },
+    {
+      "from": "Jamnagar",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Jamnagar",
+      "to": "Rajkot"
+    },
+    {
+      "from": "Jammu",
+      "to": "Leh"
+    },
+    {
+      "from": "Jammu",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Jammu",
+      "to": "Srinagar"
+    },
+    {
+      "from": "Jodhpur",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Kochi",
+      "to": "Madurai"
+    },
+    {
+      "from": "Kochi",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Kochi",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Kochi",
+      "to": "Pune"
+    },
+    {
+      "from": "Kochi",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Lucknow"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Patna"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Port Blair"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Prayagraj"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Ranchi"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Silchar"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Varanasi"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Kolkata",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Leh",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Leh",
+      "to": "Srinagar"
+    },
+    {
+      "from": "Lucknow",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Lucknow",
+      "to": "Patna"
+    },
+    {
+      "from": "Lucknow",
+      "to": "Prayagraj"
+    },
+    {
+      "from": "Lucknow",
+      "to": "Varanasi"
+    },
+    {
+      "from": "Madurai",
+      "to": "Mangaluru"
+    },
+    {
+      "from": "Madurai",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Madurai",
+      "to": "Pune"
+    },
+    {
+      "from": "Madurai",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Mangaluru",
+      "to": "Mumbai"
+    },
+    {
+      "from": "Mangaluru",
+      "to": "Pune"
+    },
+    {
+      "from": "Mangaluru",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Nagpur"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Patna"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Port Blair"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Prayagraj"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Pune"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Raipur"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Rajkot"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Ranchi"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Silchar"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Srinagar"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Tirupati"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Udaipur"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Vadodara"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Varanasi"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Mumbai",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Nagpur",
+      "to": "Raipur"
+    },
+    {
+      "from": "Patna",
+      "to": "Prayagraj"
+    },
+    {
+      "from": "Patna",
+      "to": "Ranchi"
+    },
+    {
+      "from": "Patna",
+      "to": "Varanasi"
+    },
+    {
+      "from": "Port Blair",
+      "to": "Silchar"
+    },
+    {
+      "from": "Port Blair",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Prayagraj",
+      "to": "Varanasi"
+    },
+    {
+      "from": "Pune",
+      "to": "Thiruvananthapuram"
+    },
+    {
+      "from": "Pune",
+      "to": "Tirupati"
+    },
+    {
+      "from": "Pune",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Pune",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Rajkot",
+      "to": "Vadodara"
+    },
+    {
+      "from": "Ranchi",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Srinagar",
+      "to": "Leh"
+    },
+    {
+      "from": "Thiruvananthapuram",
+      "to": "Tirupati"
+    },
+    {
+      "from": "Thiruvananthapuram",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Thiruvananthapuram",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Tirupati",
+      "to": "Vijayawada"
+    },
+    {
+      "from": "Tirupati",
+      "to": "Visakhapatnam"
+    },
+    {
+      "from": "Vijayawada",
+      "to": "Visakhapatnam"
+    }
+  ],
+  "notes": [
+    "Air India operates Jammu to Delhi flights on Sundays and does not operate Delhi to Jammu flights.",
+    "Map not to scale. The depiction and use of routes and boundaries are for informative purposes only.",
+    "Route map as on 23rd January 2025"
+  ]
+}

@@ -1,0 +1,21 @@
+# Secrets — never commit
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+*.egg-info/
+
+# Vector store / local data
+chroma_db/
+*.faiss
+*.pkl
+# runtime conversation memory (not for repo)
+data/chat_history.sqlite
+*.sqlite
+
+# Source PDFs — not committed (copyright). Add your own locally to build the index.
+*.pdf

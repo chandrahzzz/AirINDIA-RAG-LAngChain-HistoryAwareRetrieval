@@ -1,0 +1,355 @@
+{
+  "scope": "international",
+  "destinations": [
+    "AMS",
+    "CPH",
+    "FRA",
+    "MXP",
+    "CDG",
+    "VIE",
+    "ZRH",
+    "BHX",
+    "LHR",
+    "LGW",
+    "ORD",
+    "EWR",
+    "JFK",
+    "SFO",
+    "YYZ",
+    "YVR",
+    "IAD",
+    "AUH",
+    "DMM",
+    "DOH",
+    "DXB",
+    "JED",
+    "MCT",
+    "RUH",
+    "TLV",
+    "HKG",
+    "ICN",
+    "NRT",
+    "DPS",
+    "BKK",
+    "SGN",
+    "KUL",
+    "HKT",
+    "SIN",
+    "CMB",
+    "DAC",
+    "KTM",
+    "MLE",
+    "RGN",
+    "MRU",
+    "NBO",
+    "MEL",
+    "SYD",
+    "ATQ",
+    "AMD",
+    "BOM",
+    "PNQ",
+    "DEL",
+    "GOX",
+    "BLR",
+    "HYD",
+    "MAA",
+    "COK",
+    "CCU"
+  ],
+  "routes": [
+    {
+      "from": "DEL",
+      "to": "AMS"
+    },
+    {
+      "from": "DEL",
+      "to": "CPH"
+    },
+    {
+      "from": "DEL",
+      "to": "FRA"
+    },
+    {
+      "from": "BOM",
+      "to": "FRA"
+    },
+    {
+      "from": "DEL",
+      "to": "MXP"
+    },
+    {
+      "from": "DEL",
+      "to": "CDG"
+    },
+    {
+      "from": "DEL",
+      "to": "VIE"
+    },
+    {
+      "from": "DEL",
+      "to": "ZRH"
+    },
+    {
+      "from": "DEL",
+      "to": "BHX"
+    },
+    {
+      "from": "ATQ",
+      "to": "BHX"
+    },
+    {
+      "from": "DEL",
+      "to": "LHR"
+    },
+    {
+      "from": "BOM",
+      "to": "LHR"
+    },
+    {
+      "from": "BLR",
+      "to": "LHR"
+    },
+    {
+      "from": "ATQ",
+      "to": "LGW"
+    },
+    {
+      "from": "AMD",
+      "to": "LGW"
+    },
+    {
+      "from": "GOX",
+      "to": "LGW"
+    },
+    {
+      "from": "COK",
+      "to": "LGW"
+    },
+    {
+      "from": "DEL",
+      "to": "ORD"
+    },
+    {
+      "from": "DEL",
+      "to": "EWR"
+    },
+    {
+      "from": "BOM",
+      "to": "EWR"
+    },
+    {
+      "from": "DEL",
+      "to": "JFK"
+    },
+    {
+      "from": "BOM",
+      "to": "JFK"
+    },
+    {
+      "from": "DEL",
+      "to": "SFO"
+    },
+    {
+      "from": "BOM",
+      "to": "SFO"
+    },
+    {
+      "from": "BLR",
+      "to": "SFO"
+    },
+    {
+      "from": "DEL",
+      "to": "YYZ"
+    },
+    {
+      "from": "DEL",
+      "to": "YVR"
+    },
+    {
+      "from": "DEL",
+      "to": "IAD"
+    },
+    {
+      "from": "BOM",
+      "to": "AUH"
+    },
+    {
+      "from": "BOM",
+      "to": "DMM"
+    },
+    {
+      "from": "DEL",
+      "to": "DOH"
+    },
+    {
+      "from": "BOM",
+      "to": "DOH"
+    },
+    {
+      "from": "COK",
+      "to": "DOH"
+    },
+    {
+      "from": "DEL",
+      "to": "DXB"
+    },
+    {
+      "from": "BOM",
+      "to": "DXB"
+    },
+    {
+      "from": "COK",
+      "to": "DXB"
+    },
+    {
+      "from": "HYD",
+      "to": "DXB"
+    },
+    {
+      "from": "MAA",
+      "to": "DXB"
+    },
+    {
+      "from": "DEL",
+      "to": "JED"
+    },
+    {
+      "from": "BOM",
+      "to": "JED"
+    },
+    {
+      "from": "BOM",
+      "to": "MCT"
+    },
+    {
+      "from": "DEL",
+      "to": "RUH"
+    },
+    {
+      "from": "BOM",
+      "to": "RUH"
+    },
+    {
+      "from": "DEL",
+      "to": "TLV"
+    },
+    {
+      "from": "DEL",
+      "to": "HKG"
+    },
+    {
+      "from": "DEL",
+      "to": "ICN"
+    },
+    {
+      "from": "DEL",
+      "to": "NRT"
+    },
+    {
+      "from": "DEL",
+      "to": "DPS"
+    },
+    {
+      "from": "DEL",
+      "to": "BKK"
+    },
+    {
+      "from": "BOM",
+      "to": "BKK"
+    },
+    {
+      "from": "DEL",
+      "to": "SGN"
+    },
+    {
+      "from": "DEL",
+      "to": "KUL"
+    },
+    {
+      "from": "DEL",
+      "to": "HKT"
+    },
+    {
+      "from": "DEL",
+      "to": "SIN"
+    },
+    {
+      "from": "BOM",
+      "to": "SIN"
+    },
+    {
+      "from": "BLR",
+      "to": "SIN"
+    },
+    {
+      "from": "MAA",
+      "to": "SIN"
+    },
+    {
+      "from": "PNQ",
+      "to": "SIN"
+    },
+    {
+      "from": "DEL",
+      "to": "CMB"
+    },
+    {
+      "from": "BOM",
+      "to": "CMB"
+    },
+    {
+      "from": "MAA",
+      "to": "CMB"
+    },
+    {
+      "from": "DEL",
+      "to": "DAC"
+    },
+    {
+      "from": "BOM",
+      "to": "DAC"
+    },
+    {
+      "from": "DEL",
+      "to": "KTM"
+    },
+    {
+      "from": "DEL",
+      "to": "MLE"
+    },
+    {
+      "from": "BOM",
+      "to": "MLE"
+    },
+    {
+      "from": "DEL",
+      "to": "RGN"
+    },
+    {
+      "from": "BOM",
+      "to": "MRU"
+    },
+    {
+      "from": "DEL",
+      "to": "NBO"
+    },
+    {
+      "from": "DEL",
+      "to": "MEL"
+    },
+    {
+      "from": "BOM",
+      "to": "MEL"
+    },
+    {
+      "from": "DEL",
+      "to": "SYD"
+    }
+  ],
+  "notes": [
+    "Air India flies non-stop to 42 destinations across five continents from multiple Indian cities (pinned on the map of India)",
+    "Map not to scale. The depiction and use of routes and boundaries are for informative purposes only.",
+    "Flights to Tel Aviv will restart effective 2nd March 2025",
+    "Route map as on 23rd January 2025"
+  ]
+}

@@ -2,7 +2,8 @@
 
 A retrieval-augmented chatbot over five Air India PDFs (service regulations, fact
 sheet, route maps, disaster history). Built for **accuracy** and **low latency** on
-a **free** Gemini API tier.
+a **free** Gemini API tier, served as a **web app** (FastAPI + a simple chat UI)
+with a terminal version too.
 
 ## Why RAG (not "stuff the PDF into the prompt")
 The corpus is ~120 pages / 6.5 MB — far too large to put in every prompt, and the
@@ -54,8 +55,13 @@ python -m src.ingest                # embed -> chroma_db/ + data/bm25.pkl
 > takes a few minutes. This is automatic.
 
 ## Chat
+Web app (recommended):
 ```bash
-python main.py                      # the chatbot (LangChain RAG: ensemble + rerank, SQL memory)
+python -m src.server                # then open http://127.0.0.1:8000
+```
+Command line:
+```bash
+python main.py                      # terminal chat (LangChain RAG: ensemble + rerank, SQL memory)
 ```
 
 ## Evaluate (regression guard)
@@ -65,7 +71,9 @@ python scripts/eval.py              # runs the golden-question set
 
 ## Layout
 ```
-main.py              entry point -> runs the chatbot
+main.py              entry point -> terminal chat
+src/server.py        FastAPI web server (serves UI + streaming /chat)
+static/index.html    web chat UI (AIR INDIA CHAT BOT)
 config.py            paths, model names, knobs
 src/maps_extract.py  Gemini Vision route extraction
 src/clean.py         per-source text cleaning
@@ -79,8 +87,15 @@ scripts/test_key.py  key smoke test
 scripts/eval.py      golden-set evaluation (runs through the LangChain chain)
 ```
 
+## Known limits
+- **Free-tier quotas:** `gemini-2.5-flash` allows ~20 generations/day; embeddings
+  ~100/min (ingestion is paced for this). Set `CHAT_MODEL = "gemini-2.0-flash"` in
+  `config.py` for more daily headroom.
+- **Route maps:** extracted from dense map infographics via Gemini Vision, so route
+  data can have occasional gaps. Fleet/regulation/history answers are reliable.
+
 ## Possible next steps
 - Re-OCR the regulations PDF (it has OCR typos) for even cleaner retrieval.
-- FastAPI streaming endpoint + a small web UI.
 - Semantic cache for repeated questions.
 - Migrate Chroma → pgvector/Pinecone only if the corpus grows large.
+- Deploy (e.g. AWS): build the index, then ship the app + index behind the server.

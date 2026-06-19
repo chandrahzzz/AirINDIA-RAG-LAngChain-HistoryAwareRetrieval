@@ -1,196 +1,133 @@
 # How My Air India RAG Chatbot Works
 
-This is my write-up of what I built — the key features first, then how every file
-works, how each piece of the tech stack fits in, and the complete end-to-end flow.
+My notes on exactly how the app works right now: the key features, the tech stack
+and what each piece does, how every file works, and the end-to-end flow.
 
 ---
 
-## ⭐ Key insights & features (the highlights)
+## Key features
 
-- **It's a RAG chatbot, not a "stuff-the-PDF-in-the-prompt" bot.** My 5 PDFs are
-  ~120 pages / 6.5 MB — too big to feed the model every time. So I index everything
-  once and only retrieve the few most relevant chunks per question.
-- **I solved the hardest part: the route maps.** Two of my PDFs are *map infographics*
-  — plain text extraction gives a useless list of city names with no connections. I
-  used **Gemini Vision** to read the maps and extract ~310 routes as structured data.
-  This is the single biggest accuracy win and what a normal pypdf tutorial bot gets wrong.
-- **Hybrid retrieval + reranking.** I combine **semantic (vector)** search with
-  **keyword (BM25)** search, then a **cross-encoder reranker** picks the best chunks.
-  Meaning-matches *and* exact-term matches (like "A321neo" or a clause number).
-- **It remembers the conversation.** Follow-ups like "and how many are on order?" work,
-  because a **history-aware rewrite** turns them into standalone questions before
-  searching. History is stored in **SQLite**, so it survives restarts.
-- **It doesn't hallucinate.** A grounded prompt forces the model to answer *only* from
-  retrieved context and to **cite sources** inline, e.g. `[Air India Fact Sheet p3]`.
-- **Built on LangChain (1.x)** — the recognizable RAG stack (`EnsembleRetriever`,
-  `CrossEncoderReranker`, `create_history_aware_retriever`, `RunnableWithMessageHistory`).
-- **Runs on the Gemini free tier**, in an isolated **virtual environment**, with a
-  **golden-set eval** that proves accuracy (currently 5/5).
-- **One command to run it:** `python main.py`.
+- **RAG chatbot** over 5 Air India PDFs — it retrieves only the relevant passages
+  per question instead of stuffing whole documents into the prompt.
+- **Web chat app** (FastAPI + a simple HTML/JS frontend) titled **AIR INDIA CHAT BOT**,
+  with streaming answers and a New-chat button. A terminal version also exists.
+- **Gemini Vision route extraction** — the two route PDFs are map infographics, so I
+  use Gemini Vision to read them into structured route data (the big accuracy win).
+- **Hybrid retrieval + reranking** — semantic (vector) + keyword (BM25) search, then a
+  cross-encoder reranker keeps the best chunks.
+- **Conversational memory** — follow-ups ("and how many on order?") work via a
+  history-aware rewrite; history is stored in SQLite and survives restarts.
+- **Grounded answers with real citations** — answers come only from retrieved context,
+  cited from actual metadata, e.g. `[Air India Service Regulations, CHAPTER IV - RETIREMENT, p16]`.
+- **Robust** — retries transient Gemini 5xx errors so answers don't die mid-stream, and
+  feeds the full route list for "list/count all" route questions so they're complete.
 
 ---
 
-## 1. What this project is (the short version)
+## What it is
 
-A **RAG (Retrieval-Augmented Generation) chatbot** that answers questions about
-Air India using 5 PDFs:
+A Retrieval-Augmented Generation chatbot answering questions about Air India from:
 
-- `Aiesl Employees service regulation.pdf` (94 pages of HR/service rules)
-- `Air India Fact Sheet.pdf` (fleet numbers, orders, facts)
-- `Domestic Routes Feb 2025 (1).pdf` (a **map infographic**)
-- `International Routes Feb 2025.pdf` (another **map infographic**)
-- `List of Major Air India Disasters … Britannica.pdf` (a web article)
+- `Aiesl Employees service regulation.pdf` — 94-page HR/service rules
+- `Air India Fact Sheet.pdf` — fleet numbers, orders, facts
+- `Domestic Routes Feb 2025.pdf` — map infographic
+- `International Routes Feb 2025.pdf` — map infographic
+- `List of Major Air India Disasters … Britannica.pdf` — web article
 
-The chatbot is built with **LangChain** (`src/lc_chain.py`) and launched from `main.py`.
+Built with **LangChain**, served as a **web app** (`python -m src.server`) on Gemini's free tier.
 
 ---
 
-## 2. The tech stack and how I implemented each piece
+## Tech stack and what each piece does
 
 | Tech | What it does in my project | Where |
 |---|---|---|
-| **Google Gemini (`google-genai` SDK)** | The LLM. `gemini-2.5-flash` generates answers + reads the route-map PDFs (vision). `gemini-embedding-001` turns text into 3072-dim vectors. | `src/embeddings.py`, `src/maps_extract.py` |
-| **Gemini Vision** | Reads the two route-map infographics (basically pictures) and extracts destinations + routes + notes as structured JSON. My biggest accuracy trick. | `src/maps_extract.py` |
-| **Chroma** | Local, persisted **vector database**. Stores the embeddings for semantic similarity search. No cloud DB needed. | `src/ingest.py`, `src/lc_chain.py` |
-| **BM25 (`rank_bm25`)** | Keyword search index. Catches exact tokens like "A321neo" or clause numbers that vector search can miss. | `src/ingest.py`, `src/lc_chain.py` |
-| **Hybrid retrieval** | Combines vector + BM25 via LangChain's `EnsembleRetriever` (weighted 0.6 / 0.4) so I get both *meaning* and *exact-word* matches. | `src/lc_chain.py` |
-| **Cross-encoder reranker (`bge-reranker-base`)** | After hybrid search grabs ~20 candidates, this re-scores them and keeps the best 5. Runs locally, free. Degrades gracefully if unavailable. | `src/lc_chain.py` |
-| **LangChain (1.x) + LangChain-Classic** | Orchestrates the whole RAG chain: retriever → history-aware rewrite → grounded answer → memory. | `src/lc_chain.py` |
-| **SQLite** | Stores the conversation history so the bot remembers context and survives restarts. | `src/lc_chain.py` |
-| **pypdf** | Pulls the raw text out of the text-based PDFs (regulations, fact sheet, article). | `src/loaders.py` |
-| **python-dotenv** | Loads my `GOOGLE_API_KEY` from `.env` so the key never sits in the code. | `config.py` |
-| **venv (virtual environment)** | Keeps this project's packages isolated from my other Python projects (they had conflicting LangChain/FastAPI/Pinecone versions). | `.venv/` |
+| **Google Gemini (`google-genai` SDK)** | `gemini-2.5-flash` writes the answers and reads the route-map PDFs (vision); `gemini-embedding-001` turns text into 3072-dim vectors. | `src/embeddings.py`, `src/maps_extract.py`, `src/lc_chain.py` |
+| **Gemini Vision** | Reads the two route-map infographics and extracts destinations + routes + notes as structured JSON. | `src/maps_extract.py` |
+| **Chroma** | Local, persisted vector database for semantic similarity search. | `src/ingest.py`, `src/lc_chain.py` |
+| **BM25 (`rank_bm25`)** | Keyword index — catches exact tokens like "A321neo" or clause numbers vectors miss. | `src/ingest.py`, `src/lc_chain.py` |
+| **LangChain (1.x) + LangChain-Classic** | Orchestrates the RAG chain: hybrid retrieval → history-aware rewrite → grounded answer → memory. | `src/lc_chain.py` |
+| **EnsembleRetriever** | Combines vector + BM25 results (hybrid retrieval). | `src/lc_chain.py` |
+| **CrossEncoderReranker (`bge-reranker-base`)** | Re-scores ~20 candidates and keeps the best 8. Local, free. | `src/lc_chain.py` |
+| **SQLite** | Stores conversation history per session; survives restarts. | `src/lc_chain.py` |
+| **FastAPI + Uvicorn** | The web server: serves the chat page and a streaming `/chat` endpoint. | `src/server.py` |
+| **HTML / CSS / JS** | The chat UI — message bubbles, streaming, session id in localStorage. | `static/index.html` |
+| **pypdf** | Extracts text from the text-based PDFs. | `src/loaders.py` |
+| **python-dotenv** | Loads `GOOGLE_API_KEY` from `.env` so the key isn't in code. | `config.py` |
+| **venv** | Isolates this project's packages from my other Python projects. | `.venv/` |
 
 ---
 
-## 3. How each file works
+## How each file works
 
-### Entry point, config & secrets
-- **`main.py`** — The entry point. `python main.py` launches the chatbot.
-- **`config.py`** — Central settings: all the paths (PDFs, `chroma_db/`, `data/bm25.pkl`,
-  the SQLite history DB), the **model names** (`gemini-embedding-001`, `gemini-2.5-flash`,
-  `bge-reranker-base`), and the **knobs** (chunk size 1000, overlap 150, retrieve 20
-  candidates, rerank down to top 5, memory window of 6 turns). Loads the API key from
-  `.env` and exposes `require_key()` which fails loudly if it's missing.
-- **`.env`** — My `GOOGLE_API_KEY`. Git-ignored so it never gets committed.
-- **`.env.example`** — Safe template showing what `.env` should look like.
-- **`.gitignore`** — Ignores `.env`, the venv, `__pycache__`, and the generated
-  `chroma_db/` / index files.
-- **`requirements.txt`** — All dependencies, pinned (LangChain pinned to 1.x because
-  1.x moved the legacy RAG helpers into `langchain-classic`).
+### Entry points, config, secrets
+- **`src/server.py`** — FastAPI web app. Serves `static/index.html` at `/`, and a
+  streaming `/chat` endpoint that runs the LangChain chain per browser `session_id`.
+  Retries transient 5xx before the first token and degrades gracefully on errors.
+- **`main.py`** — terminal entry point (`python main.py`) for a CLI chat.
+- **`config.py`** — paths, model names, and knobs (chunk size 1000, overlap 150,
+  retrieve 20 candidates, rerank to top 8, memory window 6 turns). Loads the API key.
+- **`.env` / `.env.example` / `.gitignore` / `requirements.txt`** — secrets, template,
+  ignore rules (PDFs, `.env`, venv, index files), and pinned dependencies.
 
 ### Ingestion pipeline (build the index — run once)
-- **`src/maps_extract.py`** — Sends each **route-map PDF** to **Gemini Vision** with a
-  prompt that asks for every destination + every route + any notes, returned as **JSON**.
-  Saves `data/routes_domestic.json` / `routes_international.json`, then renders them into
-  clean sentences in `data/routes_extracted.txt` so the retriever can use them.
-  *(This recovered ~310 routes that plain text extraction completely lost — including
-  facts like the Tel Aviv restart date.)*
-- **`src/clean.py`** — Text cleaning. Strips private-use bullet glyphs, fixes hyphenated
-  line breaks, normalizes whitespace, and removes Britannica website navigation junk
-  ("Ask the Chatbot", "Games & Quizzes", etc.).
-- **`src/loaders.py`** — Loads each PDF with a **strategy per document type**:
-  - *Regulation:* chunk per page but **tag each chunk with its CHAPTER heading** so a
-    retrieved clause keeps its context (that's why citations show `[CHAPTER III …]`).
-  - *Fact sheet / article:* clean + paragraph-pack into ~1000-char chunks.
-  - *Routes:* load the Vision-extracted prose.
-  - It also **atomizes** oversized blocks (the route list was one giant block) so no chunk
-    is way bigger than the target size. Every chunk carries metadata
-    `{source, doc_type, page, section}` for citations and filtering.
-- **`src/embeddings.py`** — Wraps Gemini embeddings. Uses **task types**
-  (`RETRIEVAL_DOCUMENT` when indexing, `RETRIEVAL_QUERY` when searching) for better
-  matching. Has **rate limiting + 429 backoff** because the free tier only allows ~100
-  embed requests/min — it paces itself and retries when Google says to wait.
-- **`src/ingest.py`** — The build step. Loads all chunks → embeds them → stores vectors
-  in **Chroma** (`chroma_db/`) → builds the **BM25** keyword index → pickles it to
-  `data/bm25.pkl`. Re-run anytime the PDFs change. *(I built 239 chunks / 239 vectors.)*
+- **`src/maps_extract.py`** — sends each route-map PDF to Gemini Vision and saves the
+  routes as JSON (`data/routes_*.json`) plus a readable `data/routes_extracted.txt`.
+- **`src/clean.py`** — strips bullet glyphs, fixes hyphenation, removes Britannica web
+  navigation junk.
+- **`src/loaders.py`** — loads each PDF by type and chunks it. For the regulations it
+  tags each chunk with its **CHAPTER heading** using OCR-tolerant detection (handles
+  "GHAPTER IV", "Xl"→"XI"), and builds a clean **citation label** per chunk.
+- **`src/embeddings.py`** — Gemini embeddings with task types (document vs query) and
+  **rate limiting + 429 backoff** for the free-tier ~100/min cap.
+- **`src/ingest.py`** — loads → embeds → stores vectors in Chroma + builds the BM25
+  index (`data/bm25.pkl`). Re-run when the PDFs change. (239 chunks.)
 
-### The RAG chain (LangChain)
-- **`src/lc_chain.py`** — The whole question-answering flow, built with **LangChain**:
-  - Wraps my rate-limited Gemini embedder as a LangChain `Embeddings` (so it reuses the
-    index I already built, no deprecated SDK).
-  - `EnsembleRetriever` = Chroma vector retriever + `BM25Retriever` → **hybrid retrieval**.
-  - `ContextualCompressionRetriever` + `CrossEncoderReranker` → **reranking** (top ~20 →
-    best 5). Falls back to the ensemble order if the reranker model isn't available.
-  - `create_history_aware_retriever` → **follow-up question rewriting** (turns "and how
-    many on order?" into a full standalone question *before* retrieving).
-  - `create_retrieval_chain` + `create_stuff_documents_chain` → retrieve then answer with
-    a **grounded prompt** + inline citations.
-  - `RunnableWithMessageHistory` + a windowed `SQLChatMessageHistory` (my
-    `WindowedSQLHistory`) → **conversation memory**: last 6 turns, per `session_id`,
-    survives restarts.
-  - LLM is `ChatGoogleGenerativeAI` (Gemini 2.5 Flash), streamed.
-- **`src/lc_cli.py`** — The command-line chat loop `main.py` calls. Streams tokens,
-  supports `/new` (fresh session) and `/exit`.
+### The RAG chain
+- **`src/lc_chain.py`** — the whole answering flow:
+  - `EnsembleRetriever` (Chroma vector + BM25) → **hybrid retrieval**.
+  - `CrossEncoderReranker` inside `ContextualCompressionRetriever` → **reranking** to top 8.
+  - For **route/flight queries**, injects the complete route list so "list/count all"
+    answers are complete.
+  - `create_history_aware_retriever` → rewrites follow-ups into standalone questions.
+  - `create_retrieval_chain` + `create_stuff_documents_chain` with a `document_prompt`
+    that shows each chunk's **real citation label** → grounded answers with correct cites.
+  - `RunnableWithMessageHistory` + windowed `SQLChatMessageHistory` → **memory**.
+  - LLM is `ChatGoogleGenerativeAI` (Gemini 2.5 Flash) with `max_retries` + timeout.
+- **`src/lc_cli.py`** — the terminal chat loop used by `main.py`.
 
-### Scripts & docs
-- **`scripts/test_key.py`** — Quick check that my Gemini key works (one embed call + one
-  chat call). I run this first whenever I change the key.
-- **`scripts/eval.py`** — My **golden-set evaluator**: 5 known Q&A pairs across fleet /
-  routes / regulations. For each, it checks both "did it retrieve the right source?" and
-  "does the answer contain the expected fact?". Runs through the LangChain chain. This is
-  my **regression guard** — I run it after any change. *(Currently 5/5 passing.)*
-- **`README.md`** — Setup + how to run.
-- **`functioning.md`** — This file.
+### Scripts
+- **`scripts/test_key.py`** — checks the Gemini key (one embed + one chat call).
+- **`scripts/eval.py`** — golden-set evaluator (5 Q&A across fleet/routes/regulations);
+  checks retrieval source + answer correctness. My regression guard (5/5 passing).
 
 ---
 
-## 4. The complete end-to-end flow
+## End-to-end flow
 
-**A) One-time setup**
-1. Make a venv, `pip install -r requirements.txt`, put my key in `.env`.
-2. `python scripts/test_key.py` → confirms Gemini works.
+**Setup (once):** make a venv, `pip install -r requirements.txt`, put the key in `.env`,
+`python scripts/test_key.py`.
 
-**B) Build the index (run once, re-run if PDFs change)**
-3. `python -m src.maps_extract` → Gemini Vision reads the two map PDFs → structured routes.
-4. `python -m src.ingest` → load + clean + chunk all PDFs → embed (rate-limited) → store
-   in Chroma + build BM25. *(239 chunks indexed.)*
+**Build the index (once, re-run if PDFs change):**
+1. `python -m src.maps_extract` → Gemini Vision → structured routes.
+2. `python -m src.ingest` → load + clean + chunk → embed → Chroma + BM25.
 
-**C) Chatting (every question) — `python main.py`**
-5. I type a question.
-6. **History-aware rewrite** turns my follow-up into a standalone question using recent
-   conversation (only if there's history).
-7. **Hybrid retrieval** (vector + BM25) pulls ~20 candidate chunks.
-8. **Reranker** scores them and keeps the best 5.
-9. Those 5 chunks + my question go to **Gemini 2.5 Flash** with a **grounded prompt**
-   ("answer only from this context, cite sources, don't make things up").
-10. The answer **streams** back with inline citations like `[Air India Fact Sheet p3]`.
-11. The turn is saved to **SQLite memory** so the next question has context.
+**Run the app:** `python -m src.server` → open `http://127.0.0.1:8000`.
 
-**D) Checking quality**
-12. `python scripts/eval.py` → runs my 5 golden questions → 5/5 passing.
+**Per question:**
+1. History-aware rewrite turns a follow-up into a standalone question.
+2. Hybrid retrieval (vector + BM25) → ~20 candidates; reranker → best 8
+   (route queries also get the full route list).
+3. The chunks + question go to Gemini 2.5 Flash with a grounded prompt.
+4. The answer streams back with citations; the turn is saved to SQLite.
+
+**Check quality:** `python scripts/eval.py` → 5/5.
 
 ---
 
-## 5. The key decisions I made (and why)
-
-- **RAG instead of stuffing the PDF in the prompt** — the corpus is too big and the maps
-  are unreadable as plain text.
-- **Gemini Vision on the route maps** — biggest accuracy win; a normal pypdf bot would get
-  route questions wrong.
-- **Hybrid retrieval + reranking** — semantic search alone misses exact terms; keyword
-  alone misses meaning; reranking sharpens the final 5 chunks.
-- **Structure-aware chunking** — regulation chunks keep their CHAPTER heading so answers
-  cite the right section.
-- **Grounded prompt + citations** — stops hallucination, which matters for a
-  factual/regulatory bot.
-- **Rate-limited embedder** — the Gemini free tier caps embeddings at ~100/min.
-- **A virtual environment** — my global Python had conflicting packages; the venv keeps
-  this project clean and reproducible.
-- **LangChain for the orchestration** — gives me the standard, recognizable RAG components
-  (`EnsembleRetriever`, reranker, history-aware retriever, `RunnableWithMessageHistory`)
-  instead of hand-wiring them.
-
----
-
-## 6. Good to know (limits)
-- **Free-tier daily cap:** `gemini-2.5-flash` allows ~20 generations/day on the free tier
-  (resets daily). Switching `CHAT_MODEL` to `gemini-2.0-flash` in `config.py` gives more
-  daily headroom if I do heavy testing.
-- **Embeddings:** ~100/min free-tier cap, which is why ingestion is paced.
-
-## 7. What's not done yet (future ideas)
-- FastAPI streaming endpoint + a web UI (Streamlit/React).
-- Re-OCR the regulations PDF (it has scanner typos).
-- A semantic cache for repeated questions.
-- Move Chroma → pgvector/Pinecone only if the data grows a lot.
+## Known limits
+- **Free-tier quotas:** `gemini-2.5-flash` ≈ 20 generations/day; embeddings ≈ 100/min
+  (ingestion is paced for this). Switching `CHAT_MODEL` to `gemini-2.0-flash` gives more
+  daily headroom.
+- **Route maps:** extracted from dense infographics, so route data can have occasional
+  gaps. Core fleet/regulation answers are reliable.

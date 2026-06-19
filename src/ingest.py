@@ -34,7 +34,11 @@ def build() -> None:
     texts = [c.text for c in chunks]
     ids = [c.id for c in chunks]
     metas = [
-        {"source": c.source, "doc_type": c.doc_type, "page": c.page, "section": c.section}
+        {
+            "source": c.source, "doc_type": c.doc_type, "page": c.page,
+            "section": c.section,
+            "cite": loaders.make_cite(c.doc_type, c.page, c.section),
+        }
         for c in chunks
     ]
 

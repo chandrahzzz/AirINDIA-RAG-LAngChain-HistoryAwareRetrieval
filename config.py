@@ -34,7 +34,7 @@ RERANK_MODEL = "BAAI/bge-reranker-base"  # local cross-encoder
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 150
 RETRIEVE_K = 20      # candidates pulled by hybrid search
-RERANK_TOP_N = 5     # passed to the LLM after reranking
+RERANK_TOP_N = 8     # passed to the LLM after reranking (higher = better recall of provisos)
 
 # --- Memory ---
 MEMORY_WINDOW_TURNS = 6  # last N user/assistant exchanges kept verbatim

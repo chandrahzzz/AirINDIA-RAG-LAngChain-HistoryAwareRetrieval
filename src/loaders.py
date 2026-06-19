@@ -27,7 +27,44 @@ SOURCES = {
     "List of Major Air India Disasters _ Crashes, Death Toll, Tata Group, History, & Accidents _ Britannica.pdf": ARTICLE,
 }
 
-CHAPTER_RE = re.compile(r"\bCHAPTER\s+[IVXLC]+\b.*", re.IGNORECASE)
+# Heading detector. OCR-tolerant: the leading letter is often mangled
+# ("GHAPTER IV", "OHAPTER"), so accept C/G/O. Anchored to line start and
+# requiring a separator after the numeral avoids matching mid-sentence
+# cross-references like "...framed under Chapter XII of these Regulations".
+CHAPTER_RE = re.compile(
+    r"^\s*[CGO]HAPTER\s+([IVXLC]+)\s*[-–._]\s*(.*)$",
+    re.IGNORECASE | re.MULTILINE,
+)
+_ROMAN = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100}
+
+
+def _roman_to_int(s: str) -> int:
+    s = s.upper()
+    total, prev = 0, 0
+    for ch in reversed(s):
+        v = _ROMAN.get(ch, 0)
+        total += -v if v < prev else v
+        prev = max(prev, v)
+    return total
+
+
+def _detect_chapter(text: str, last_value: int) -> tuple[str, int] | None:
+    """Return (normalized_label, roman_value) for the next real chapter heading on
+    this page, or None. Picks the smallest chapter number greater than the last one
+    seen, so backward cross-references are ignored and skipped numbers are caught."""
+    best = None
+    for m in CHAPTER_RE.finditer(text):
+        # OCR renders 'I' as lowercase 'l'. Chapters only run I..XVII, so the letter
+        # L (50) never legitimately appears — normalize any L back to I.
+        numeral = m.group(1).upper().replace("L", "I")
+        val = _roman_to_int(numeral)
+        if val <= last_value:                 # cross-reference to an earlier chapter
+            continue
+        title = " ".join(m.group(2).split()).rstrip(",.")
+        label = f"CHAPTER {numeral}" + (f" - {title}" if title else "")
+        if best is None or val < best[1]:
+            best = (label, val)
+    return best
 
 
 @dataclass
@@ -39,6 +76,28 @@ class Chunk:
     page: int = 0
     section: str = ""
     meta: dict = field(default_factory=dict)
+
+
+# Friendly document names for citations (instead of raw filenames).
+_DOC_NAME = {
+    REGULATION: "Air India Service Regulations",
+    PROSE: "Air India Fact Sheet",
+    ARTICLE: "Air India Disasters (Britannica)",
+    ROUTES: "Air India Route Map, Feb 2025",
+}
+
+
+def make_cite(doc_type: str, page: int, section: str) -> str:
+    """A trustworthy, human-readable citation label, grounded in real metadata."""
+    name = _DOC_NAME.get(doc_type, "Air India document")
+    if doc_type == ROUTES:
+        return name
+    parts = [name]
+    if doc_type == REGULATION and section:
+        parts.append(section)
+    if page:
+        parts.append(f"p{page}")
+    return ", ".join(parts)
 
 
 def _split_paragraphs(text: str) -> list[str]:
@@ -92,16 +151,19 @@ def load_regulation(path: Path, doc_type: str) -> list[Chunk]:
     reader = pypdf.PdfReader(str(path))
     chunks: list[Chunk] = []
     current_chapter = ""
+    last_value = 0
     for pno, page in enumerate(reader.pages, start=1):
         raw = page.extract_text() or ""
         text = clean.clean_generic(raw)
         if not text:
             continue
-        m = CHAPTER_RE.search(text)
-        if m:
-            current_chapter = m.group(0).strip()[:120]
+        found = _detect_chapter(text, last_value)
+        if found:
+            current_chapter, last_value = found
         for i, body in enumerate(_pack(_split_paragraphs(text), config.CHUNK_SIZE, config.CHUNK_OVERLAP)):
-            header = f"[{current_chapter}] " if current_chapter else ""
+            # Prefix as context (not a bracketed token) so the model doesn't mistake
+            # it for the citation — the real citation comes from metadata (Fix B).
+            header = f"(Section: {current_chapter})\n" if current_chapter else ""
             chunks.append(Chunk(
                 id=f"{path.stem}-p{pno}-{i}",
                 text=f"{header}{body}",

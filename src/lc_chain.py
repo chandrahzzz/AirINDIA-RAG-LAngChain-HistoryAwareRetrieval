@@ -31,7 +31,8 @@ from langchain_community.chat_message_histories import SQLChatMessageHistory
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
+from langchain_core.runnables import RunnableLambda
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -49,9 +50,20 @@ QA_SYSTEM = (
     "You are the Air India information assistant. Answer ONLY using the context "
     "below. If the answer is not in the context, say you don't have that "
     "information in your documents — never invent facts, numbers, routes, or "
-    "dates. Be concise and cite sources inline like [Air India Fact Sheet p3].\n\n"
+    "dates.\n"
+    "Each context passage begins with its source in square brackets, e.g. "
+    "[Air India Service Regulations, CHAPTER IV - RETIREMENT, p15]. When you state "
+    "a fact, cite it by copying that bracketed label EXACTLY — never invent or alter "
+    "a citation.\n"
+    "Give a complete answer: include any relevant conditions, exceptions, or provisos "
+    "stated in the context (e.g. notice periods, approvals, or cases where it does "
+    "not apply).\n\n"
     "Context:\n{context}"
 )
+
+# Each retrieved chunk is rendered to the LLM with its REAL source label up front,
+# so citations are grounded in metadata instead of guessed from the text (Fix B).
+DOC_PROMPT = PromptTemplate.from_template("[{cite}]\n{page_content}")
 
 
 # --- Embeddings adapter: reuse our rate-limited, task-type-aware Gemini embed
@@ -120,13 +132,61 @@ def _hybrid_retriever():
         return ensemble
 
 
+# --- Fix 1a: route/aggregation queries need EVERY route, not just top-k --------
+_ROUTE_WORDS = (
+    "route", "routes", "flight", "flights", "fly", "flies", "destination",
+    "destinations", "connect", "connectivity", "non-stop", "nonstop", "sector",
+)
+_routes_doc_cache: Document | None = None
+
+
+def _is_route_query(text: str) -> bool:
+    t = text.lower()
+    return any(w in t for w in _ROUTE_WORDS)
+
+
+def _full_routes_doc() -> Document | None:
+    """The entire (small) route list as one document, so 'list/count all flights'
+    queries see every route instead of a top-k subset."""
+    global _routes_doc_cache
+    if _routes_doc_cache is None:
+        path = config.DATA_DIR / "routes_extracted.txt"
+        if not path.exists():
+            return None
+        _routes_doc_cache = Document(
+            page_content=path.read_text(encoding="utf-8"),
+            metadata={"cite": "Air India Route Map, Feb 2025", "doc_type": "routes",
+                      "source": "Route Maps Feb 2025", "page": 0, "section": "route network"},
+        )
+    return _routes_doc_cache
+
+
+def _augmented_retriever():
+    """Hybrid retriever, but for route-style queries prepend the COMPLETE route list
+    (and drop the partial route chunks) so answers are complete (Fix 1a)."""
+    base = _hybrid_retriever()
+
+    def _retrieve(query: str) -> list[Document]:
+        docs = base.invoke(query)
+        if _is_route_query(query):
+            full = _full_routes_doc()
+            if full is not None:
+                non_route = [d for d in docs if d.metadata.get("doc_type") != "routes"]
+                return [full] + non_route
+        return docs
+
+    return RunnableLambda(_retrieve)
+
+
 def build_chain():
     config.require_key()
     llm = ChatGoogleGenerativeAI(
         model=config.CHAT_MODEL, temperature=0.2,
         google_api_key=config.GOOGLE_API_KEY,
+        max_retries=3,      # auto-retry transient 5xx with backoff (Fix 2)
+        timeout=60,         # don't hang forever on a stuck request
     )
-    retriever = _hybrid_retriever()
+    retriever = _augmented_retriever()
 
     contextualize_prompt = ChatPromptTemplate.from_messages([
         ("system", CONTEXTUALIZE_SYSTEM),
@@ -140,7 +200,7 @@ def build_chain():
         MessagesPlaceholder("chat_history"),
         ("human", "{input}"),
     ])
-    qa_chain = create_stuff_documents_chain(llm, qa_prompt)
+    qa_chain = create_stuff_documents_chain(llm, qa_prompt, document_prompt=DOC_PROMPT)
     rag_chain = create_retrieval_chain(history_aware, qa_chain)
 
     return RunnableWithMessageHistory(

@@ -110,9 +110,14 @@ scripts/eval.py      golden-set evaluation (runs through the LangChain chain)
   data can have occasional gaps. Fleet/regulation/history answers are reliable.
 
 ## Deploy
-See `DEPLOY.md` — build the image locally, push to a registry (Docker Hub/ECR), and run
-on AWS EC2 (`t3.small`/`t3.medium`) or App Runner. The key is supplied on the server at
-runtime; the index travels inside the image.
+**Deployed on AWS EC2 (`t3.small`) via Docker.** The image
+(`travisscotch/air-india-chatbot`) bundles the pre-built index + reranker; the API key is
+supplied on the server at runtime (never in the image or git). Full steps — push to a
+registry, launch EC2, open ports 22/8000, pull & run — are in `DEPLOY.md`.
+
+> The public URL is a plain EC2 IP on port 8000 and may be offline when the instance is
+> stopped (to save cost). For a permanent address, attach an Elastic IP; for HTTPS, front
+> it with a reverse proxy / load balancer + certificate.
 
 ## Possible next steps
 - Re-OCR the regulations PDF (it has OCR typos) for even cleaner retrieval.

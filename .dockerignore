@@ -1,0 +1,21 @@
+# Keep the build context small and never ship secrets / junk into the image.
+.venv/
+.git/
+.gitignore
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Secrets — provided at runtime, never baked in
+.env
+
+# Not needed at runtime (index is pre-built and copied explicitly)
+*.pdf
+*.sqlite
+data/chat_history.sqlite
+
+# Docs / meta
+*.md
+Dockerfile
+.dockerignore

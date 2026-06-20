@@ -1,9 +1,9 @@
 # Air India RAG Chatbot
 
 A retrieval-augmented chatbot over five Air India PDFs (service regulations, fact
-sheet, route maps, disaster history). Built for **accuracy** and **low latency** on
-a **free** Gemini API tier, served as a **web app** (FastAPI + a simple chat UI)
-with a terminal version too.
+sheet, route maps, disaster history). Built for **accuracy** and **low latency**
+(~3–5s/answer) on a **free** Gemini API tier, served as a **web app** (FastAPI + a
+simple chat UI), **Dockerized**, with per-IP **rate limiting**. Terminal version too.
 
 ## Why RAG (not "stuff the PDF into the prompt")
 The corpus is ~120 pages / 6.5 MB — far too large to put in every prompt, and the
@@ -25,10 +25,10 @@ query ─► history-aware rewrite ─► hybrid retrieve ─► rerank ─► G
                  └──────────────── SQLite windowed memory (per session) ◄──────────────┘
 ```
 
-## Models (verified for this key)
+## Models
 - Embeddings: `gemini-embedding-001` (3072-dim, task-type aware)
-- Chat + Vision: `gemini-2.5-flash`
-- Reranker: `BAAI/bge-reranker-base` (local, optional — degrades gracefully)
+- Chat + Vision: `gemini-2.5-flash` (thinking disabled for speed)
+- Reranker: `cross-encoder/ms-marco-MiniLM-L-6-v2` (light, fast on CPU; degrades gracefully)
 
 ## Setup
 Use a virtual environment (keeps this project isolated from your other Python work):
@@ -64,17 +64,32 @@ Command line:
 python main.py                      # terminal chat (LangChain RAG: ensemble + rerank, SQL memory)
 ```
 
+## Run with Docker
+The image bakes in the pre-built index + reranker; the API key is passed at runtime
+(never baked in). PDFs are not needed at runtime.
+```bash
+docker build -t air-india-chatbot .
+docker run -p 8000:8000 --env-file .env air-india-chatbot   # http://127.0.0.1:8000
+```
+
+## Safety / abuse protection
+- Per-IP **rate limit** (12 req/min) and **1000-char input cap** on `/chat`.
+- Runs as a **non-root** container; API key only via env at runtime.
+- Tunable in `config.py` (`RATE_LIMIT_*`, `MAX_MESSAGE_CHARS`).
+
 ## Evaluate (regression guard)
 ```bash
-python scripts/eval.py              # runs the golden-question set
+python scripts/eval.py              # runs the golden-question set (5/5)
 ```
 
 ## Layout
 ```
 main.py              entry point -> terminal chat
-src/server.py        FastAPI web server (serves UI + streaming /chat)
+Dockerfile           container image (index + reranker baked in)
+DEPLOY.md            Docker + AWS EC2 deployment guide
+src/server.py        FastAPI web server (UI + streaming /chat + rate limiting)
 static/index.html    web chat UI (AIR INDIA CHAT BOT)
-config.py            paths, model names, knobs
+config.py            paths, model names, knobs, rate-limit settings
 src/maps_extract.py  Gemini Vision route extraction
 src/clean.py         per-source text cleaning
 src/loaders.py       PDF loading + structure-aware chunking
@@ -94,8 +109,13 @@ scripts/eval.py      golden-set evaluation (runs through the LangChain chain)
 - **Route maps:** extracted from dense map infographics via Gemini Vision, so route
   data can have occasional gaps. Fleet/regulation/history answers are reliable.
 
+## Deploy
+See `DEPLOY.md` — build the image locally, push to a registry (Docker Hub/ECR), and run
+on AWS EC2 (`t3.small`/`t3.medium`) or App Runner. The key is supplied on the server at
+runtime; the index travels inside the image.
+
 ## Possible next steps
 - Re-OCR the regulations PDF (it has OCR typos) for even cleaner retrieval.
 - Semantic cache for repeated questions.
-- Migrate Chroma → pgvector/Pinecone only if the corpus grows large.
-- Deploy (e.g. AWS): build the index, then ship the app + index behind the server.
+- For multi-instance scaling: shared chat history (RDS) + Redis-backed rate limiting.
+- HTTPS via a reverse proxy (Caddy/Nginx) or AWS ALB + ACM.

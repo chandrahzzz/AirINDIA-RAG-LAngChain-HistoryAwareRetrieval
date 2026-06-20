@@ -13,7 +13,9 @@ Composes the canonical LangChain RAG stack on top:
 """
 from __future__ import annotations
 
+import os
 import pickle
+import re
 
 import chromadb
 # LangChain 1.x moved the legacy RAG helper chains into `langchain_classic`.
@@ -117,6 +119,8 @@ def _hybrid_retriever():
 
     # Reranking layer (optional — degrade gracefully if unavailable).
     try:
+        import torch
+        torch.set_num_threads(os.cpu_count() or 4)  # use all CPU cores for reranking
         from langchain_classic.retrievers.document_compressors import CrossEncoderReranker
         from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 
@@ -178,6 +182,28 @@ def _augmented_retriever():
     return RunnableLambda(_retrieve)
 
 
+# --- Smalltalk gate: greetings don't need retrieval, so answer instantly --------
+_GREETING = re.compile(r"^(hi+|hey+|hello+|hiya|yo|howdy|greetings|good\s*(morning|afternoon|evening))\b", re.I)
+_THANKS = re.compile(r"\b(thanks|thank you|thx|ty|appreciate it)\b", re.I)
+_BYE = re.compile(r"^(bye|goodbye|see you|cya|good night)\b", re.I)
+
+
+def smalltalk_reply(message: str) -> str | None:
+    """Instant canned reply for greetings/thanks/bye so they skip the ~10s RAG
+    pipeline entirely. Returns None for anything that needs a real answer."""
+    m = message.strip()
+    if len(m) > 40:                      # long messages are real questions
+        return None
+    if _GREETING.search(m):
+        return ("Hello! I'm the Air India assistant. Ask me about the fleet, routes, "
+                "service regulations, or history.")
+    if _BYE.search(m):
+        return "Goodbye! Come back anytime with questions about Air India."
+    if _THANKS.search(m) and "?" not in m:
+        return "You're welcome! Anything else about Air India you'd like to know?"
+    return None
+
+
 def build_chain():
     config.require_key()
     llm = ChatGoogleGenerativeAI(
@@ -185,6 +211,8 @@ def build_chain():
         google_api_key=config.GOOGLE_API_KEY,
         max_retries=3,      # auto-retry transient 5xx with backoff (Fix 2)
         timeout=60,         # don't hang forever on a stuck request
+        thinking_budget=0,  # disable internal "thinking" — big latency cut, and the
+                            # answers are grounded extraction so it doesn't help quality
     )
     retriever = _augmented_retriever()
 

@@ -41,6 +41,10 @@ def main() -> None:
             continue
 
         print("Bot: ", end="", flush=True)
+        quick = lc_chain.smalltalk_reply(q)
+        if quick is not None:
+            print(quick + "\n")
+            continue
         cfg = {"configurable": {"session_id": session_id}}
         for chunk in chain.stream({"input": q}, config=cfg):
             if "answer" in chunk:

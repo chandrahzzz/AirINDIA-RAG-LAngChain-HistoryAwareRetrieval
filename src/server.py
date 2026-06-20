@@ -7,12 +7,15 @@ Run:  python -m src.server      (then open http://127.0.0.1:8000)
 """
 from __future__ import annotations
 
+import threading
 import time
+from collections import defaultdict, deque
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse
 from pydantic import BaseModel
 
 import config
@@ -20,8 +23,7 @@ from src import lc_chain
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
-app = FastAPI(title="Air India Chat Bot")
-_chain = None  # built once on first use (loads reranker, connects index)
+_chain = None  # built at startup (loads reranker, connects index)
 
 
 def get_chain():
@@ -30,6 +32,19 @@ def get_chain():
         config.require_key()
         _chain = lc_chain.build_chain()
     return _chain
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Warm up at startup so the FIRST user question doesn't pay the ~10s
+    # reranker-load / index-connect cold start.
+    print("Warming up the RAG chain (loading reranker, connecting index) ...")
+    get_chain()
+    print("Ready -> http://127.0.0.1:8000")
+    yield
+
+
+app = FastAPI(title="Air India Chat Bot", lifespan=lifespan)
 
 
 class ChatRequest(BaseModel):
@@ -47,6 +62,34 @@ def health():
     return {"status": "ok"}
 
 
+# --- Per-IP rate limiting (sliding window, in-memory, thread-safe) ----------
+_rl_lock = threading.Lock()
+_rl_hits: dict[str, deque] = defaultdict(deque)
+
+
+def _client_ip(request: Request) -> str:
+    # Behind a load balancer (AWS App Runner / ALB) the real IP is in X-Forwarded-For.
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _rate_limited(ip: str) -> bool:
+    now = time.time()
+    window = config.RATE_LIMIT_WINDOW_SEC
+    with _rl_lock:
+        hits = _rl_hits[ip]
+        while hits and now - hits[0] > window:   # drop timestamps outside the window
+            hits.popleft()
+        if len(hits) >= config.RATE_LIMIT_REQUESTS:
+            return True
+        hits.append(now)
+        if not hits:
+            _rl_hits.pop(ip, None)               # tidy empty entries
+        return False
+
+
 def _is_quota_error(msg: str) -> bool:
     return "RESOURCE_EXHAUSTED" in msg or "429" in msg
 
@@ -58,9 +101,26 @@ def _is_transient(msg: str) -> bool:
 
 
 @app.post("/chat")
-def chat(req: ChatRequest):
+def chat(req: ChatRequest, request: Request):
+    # Abuse protection: reject overlong inputs and throttle per IP.
+    if len(req.message) > config.MAX_MESSAGE_CHARS:
+        return PlainTextResponse(
+            "Your message is too long. Please shorten it and try again.",
+            status_code=413,
+        )
+    if _rate_limited(_client_ip(request)):
+        return PlainTextResponse(
+            "You're sending requests too quickly. Please wait a moment and try again.",
+            status_code=429,
+        )
+
     chain = get_chain()
     cfg = {"configurable": {"session_id": req.session_id}}
+
+    # Greetings/thanks skip the whole RAG pipeline -> instant reply.
+    quick = lc_chain.smalltalk_reply(req.message)
+    if quick is not None:
+        return StreamingResponse(iter([quick]), media_type="text/plain; charset=utf-8")
 
     def generate():
         # Up to 3 attempts. We only retry BEFORE any token has been sent, so the

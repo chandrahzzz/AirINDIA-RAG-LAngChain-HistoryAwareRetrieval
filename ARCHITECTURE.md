@@ -1,9 +1,11 @@
 # Architecture
 
-A **RAG (Retrieval-Augmented Generation)** chatbot: it answers from *retrieved Air India
-documents*, not the model's memory — so answers are grounded and cited, not hallucinated.
+An **agentic RAG chatbot**: it answers from *retrieved Air India documents* (grounded +
+cited, not hallucinated), **and** can capture an "interested" lead — which an admin must
+approve (human-in-the-loop). A **LangGraph** router decides, per message, whether to
+answer a question or collect a lead.
 
-Two phases: **build the index once**, then **answer each question**.
+Two phases: **build the index once**, then **handle each message**.
 
 ---
 
@@ -18,16 +20,23 @@ route-map PDFs ─► Gemini Vision ─► structured routes ──────�
 - Each chunk carries metadata (source, chapter, page) for correct citations.
 - Output: 239 chunks stored two ways. The live app reads this index, **not the PDFs**.
 
-## Phase 2 — Answer a question (every query)
+## Phase 2 — Handle a message (LangGraph agent, every turn)
 ```
-question + history
-   ─► history-aware rewrite (standalone question)
-   ─► embed query ─► hybrid retrieve (Chroma + BM25) ─► fuse
-   ─► rerank (cross-encoder) → best 8 chunks
-   ─► grounded prompt (chunks + citations) ─► Gemini 2.5 Flash
-   ─► stream answer + citations ─► save turn to SQLite memory
+message ─► [router] ─┬─► RAG node ─────────────────────────────────────┐
+                     │     history-aware rewrite → hybrid retrieve       │
+                     │     (Chroma + BM25) → rerank (cross-encoder, 8)   │
+                     │     → grounded prompt → Gemini 2.5 Flash          │
+                     │                                                   ▼
+                     └─► Lead-capture node ──► collect name/contact/   answer + citations
+                            routes over turns ──► save as PENDING
+                                                        │
+                              admin reviews /admin ──► APPROVE/REJECT  (human-in-the-loop)
+                                                        │
+                                                   interested list
 ```
-(Greetings are detected up front and answered instantly, skipping retrieval.)
+- State (conversation + half-filled lead) is persisted per `session_id` via a **LangGraph
+  SQLite checkpointer** — that's the conversation **memory**.
+- Greetings are detected up front and answered instantly, skipping the graph.
 
 ---
 
@@ -39,8 +48,10 @@ question + history
 | Vector DB | Chroma | semantic search |
 | Keyword search | BM25 (`rank_bm25`) | exact-term matching |
 | Reranker | `ms-marco-MiniLM-L-6-v2` | pick the most relevant chunks |
-| Orchestration | LangChain 1.x | retrieve → rewrite → answer → memory |
-| Memory | SQLite | per-session chat history |
+| Orchestration | LangChain 1.x | the RAG chain (retrieve → rewrite → grounded answer) |
+| Agent / routing | **LangGraph** | router + RAG node + lead-capture node + HITL |
+| Memory | SQLite (LangGraph checkpointer) | per-session conversation + lead state |
+| Leads | SQLite + admin page | interested list with admin approval |
 | Web | FastAPI + Uvicorn + HTML/JS | streaming `/chat` API + chat UI |
 | Packaging / Host | Docker → AWS EC2 | prod == local; public deployment |
 
@@ -52,7 +63,10 @@ question + history
 - **History-aware rewriting** — makes follow-up questions work.
 - **Structure-aware chunking** — keeps chapter context for accurate citations.
 - **Conversational memory** — remembers the dialogue per session.
+- **Agentic routing (LangGraph)** — picks RAG vs. lead-capture per message.
+- **Human-in-the-loop (HITL)** — captured leads need admin approval before they're official.
 
-> One-liner: *Hybrid-retrieval RAG over Air India PDFs — Gemini (vision/embeddings/generation),
-> Chroma + BM25, a cross-encoder reranker, LangChain orchestration with memory, served via
+> One-liner: *Agentic hybrid-retrieval RAG over Air India PDFs — Gemini
+> (vision/embeddings/generation), Chroma + BM25, a cross-encoder reranker, LangChain +
+> LangGraph orchestration with conversational memory and HITL lead capture, served via
 > FastAPI and deployed on AWS with Docker.*

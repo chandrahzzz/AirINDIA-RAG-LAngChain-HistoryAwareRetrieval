@@ -6,11 +6,12 @@ how the files fit together, and the key changes I made.
 ---
 
 ## What it is
-A **RAG (Retrieval-Augmented Generation) chatbot** answering questions about Air India
-(fleet, routes, service regulations, history) from 5 source PDFs. It retrieves only the
-relevant passages per question and answers **grounded in them, with citations**. Served
-as a **FastAPI web app** ("AIR INDIA CHAT BOT") and runs in **Docker**. Uses **Gemini**
-on the free tier.
+An **agentic RAG chatbot** answering questions about Air India (fleet, routes, service
+regulations, history) from 5 source PDFs. It retrieves only the relevant passages per
+question and answers **grounded in them, with citations**. A **LangGraph** router also lets
+it **capture "interested" leads** (name/contact/routes), which an **admin approves**
+(human-in-the-loop) before they join the interested list. Served as a **FastAPI web app**
+("AIR INDIA CHAT BOT"), runs in **Docker**, uses **Gemini** on the free tier.
 
 ---
 
@@ -38,9 +39,15 @@ on the free tier.
   list, making those answers complete.
 - **Conversational memory.** Follow-ups like "and how many are on order?" work: a
   history-aware step rewrites them into standalone questions before retrieving, and each
-  conversation is stored per session in SQLite (so it survives restarts).
+  conversation is stored per session via a **LangGraph SQLite checkpointer** (survives restarts).
+- **Agentic routing (LangGraph).** A router decides, per message, whether to answer a
+  question (RAG) or collect an interested lead — the bot *acts*, not just answers.
+- **Lead capture + human-in-the-loop.** When a user wants in, the bot collects their
+  **name, contact, and routes** over a few turns and saves the lead as **pending**. An admin
+  reviews `/admin` (token-protected) and **approves/rejects** before it joins the interested
+  list — the HITL gate.
 - **Instant greetings.** "hi"/"thanks"/"bye" are detected and answered immediately, skipping
-  the whole retrieval pipeline — no point embedding/reranking a greeting.
+  the whole pipeline — no point embedding/reranking a greeting.
 - **Fast (~3–5s/answer).** Lighter reranker, model "thinking" disabled, chain warmed up at
   startup, and fewer rerank candidates — all without lowering retrieval quality (eval 5/5).
 - **Streaming web UI.** A clean FastAPI-served page ("AIR INDIA CHAT BOT") streams the
@@ -60,10 +67,11 @@ on the free tier.
 | **Gemini Vision** | extracts destinations/routes/notes from the map infographics as JSON | `maps_extract.py` |
 | **Chroma** | local vector DB for semantic search | `ingest.py`, `lc_chain.py` |
 | **BM25 (`rank_bm25`)** | keyword search for exact terms (codes, clause numbers) | `ingest.py`, `lc_chain.py` |
-| **LangChain (1.x + classic)** | orchestrates retrieval → history rewrite → grounded answer → memory | `lc_chain.py` |
+| **LangChain (1.x + classic)** | the RAG chain: retrieval → history rewrite → grounded answer | `lc_chain.py` |
+| **LangGraph** | agentic router + RAG node + lead-capture node; SQLite checkpointer for state | `graph.py` |
 | **Cross-encoder reranker** | `ms-marco-MiniLM-L-6-v2` reranks candidates to the best 8 (light + fast on CPU) | `lc_chain.py` |
-| **SQLite** | per-session conversation history | `lc_chain.py` |
-| **FastAPI + Uvicorn** | web server: serves the UI + streaming `/chat`, rate limiting | `server.py` |
+| **SQLite** | per-session conversation/graph state + the interested-leads list | `graph.py`, `leads.py` |
+| **FastAPI + Uvicorn** | web server: UI + `/chat`, rate limiting, admin lead-approval endpoints | `server.py` |
 | **HTML/CSS/JS** | the chat UI (bubbles, streaming, session id) | `static/index.html` |
 | **Docker** | packages app + pre-built index + reranker so prod == local | `Dockerfile` |
 | **pypdf / dotenv / venv** | PDF text extraction / load API key from `.env` / isolated deps | `loaders.py`, `config.py` |
@@ -72,10 +80,11 @@ on the free tier.
 
 ## How each file works (brief)
 **App / serving**
-- `src/server.py` — FastAPI app: serves the UI, streaming `/chat`, **per-IP rate limit + length cap**, warms up the chain at startup, retries transient 5xx.
+- `src/server.py` — FastAPI app: serves the UI, `/chat` (routes through the graph), **per-IP rate limit + length cap**, warms up at startup, retries transient 5xx, and the **admin lead-approval endpoints** (`/admin`, `/admin/leads`, approve/reject).
 - `static/index.html` — chat UI; streams answers, keeps a session id in localStorage.
+- `static/admin.html` — token-protected admin page to approve/reject captured leads.
 - `main.py` — terminal chat entry point.
-- `config.py` — paths, model names, and knobs (chunk size, `RETRIEVE_K=12`, `RERANK_TOP_N=8`, memory window, rate-limit settings). Loads the key.
+- `config.py` — paths, model names, knobs (`RETRIEVE_K=12`, `RERANK_TOP_N=8`, rate limits), and `ADMIN_TOKEN`. Loads the key.
 
 **Build the index (run once)**
 - `src/maps_extract.py` — Gemini Vision → `data/routes_*.json` + `routes_extracted.txt`.
@@ -84,8 +93,10 @@ on the free tier.
 - `src/embeddings.py` — Gemini embeddings (task-type aware) with rate-limit/backoff.
 - `src/ingest.py` — loads → embeds → Chroma + BM25 index.
 
-**Answering**
-- `src/lc_chain.py` — the RAG chain: hybrid `EnsembleRetriever` → reranker → history-aware rewrite → grounded answer (`document_prompt` injects the real citation) → SQL memory; **full route list injected for "list-all" route queries**; **smalltalk gate** for greetings.
+**Answering & agent**
+- `src/lc_chain.py` — the reusable RAG chain (`build_rag_chain`): hybrid `EnsembleRetriever` → reranker → history-aware rewrite → grounded answer (`document_prompt` injects the real citation); **full route list injected for "list-all" route queries**; **smalltalk gate** for greetings.
+- `src/graph.py` — the **LangGraph** agent: a router sends each message to the **RAG node** (reuses `build_rag_chain`) or the **lead-capture node** (collects name/contact/routes via LLM extraction, saves as pending). SQLite checkpointer persists state per session.
+- `src/leads.py` — interested-list storage (SQLite): add pending, list, approve/reject.
 - `src/lc_cli.py` — terminal chat loop.
 
 **Scripts**
@@ -97,12 +108,21 @@ on the free tier.
 ## End-to-end flow
 1. Build once: `python -m src.maps_extract` → `python -m src.ingest`.
 2. Run: `python -m src.server` (or `docker run`) → `http://127.0.0.1:8000`.
-3. Per question: greeting? → instant reply. Else: history-aware rewrite → hybrid retrieve (12) → rerank (8) → Gemini (grounded) → stream answer + citations → save turn to SQLite.
-4. Quality check: `python scripts/eval.py` → 5/5.
+3. Per message: greeting? → instant reply. Else the **LangGraph router** picks:
+   - **question** → history-aware rewrite → hybrid retrieve (12) → rerank (8) → Gemini (grounded) → answer + citations.
+   - **interested** → collect name/contact/routes over turns → save as **pending**.
+4. Admin: open `/admin` (token) → approve/reject pending leads → they join the interested list.
+5. Quality check: `python scripts/eval.py` → 5/5.
 
 ---
 
 ## Key changes I made (latest session)
+- **Made it agentic with LangGraph + human-in-the-loop lead capture.** A router now decides
+  per message between answering (RAG) and capturing an interested lead. The lead-capture node
+  collects name/contact/routes over turns and saves a **pending** lead; an admin approves it
+  at `/admin` (token-protected) before it joins the interested list. The RAG node *reuses* the
+  existing retrieval pipeline, so quality is unchanged (**eval still 5/5**). New: `src/graph.py`,
+  `src/leads.py`, `static/admin.html`, `ADMIN_TOKEN`, and `langgraph` deps.
 - **Cut latency from ~10–40s to ~3–5s — without losing quality.** I measured the pipeline
   and found the bottleneck was the **reranker**, not the LLM. Fixes:
   - Swapped the heavy `bge-reranker-base` (278M params) for the lighter

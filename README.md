@@ -1,9 +1,11 @@
 # Air India RAG Chatbot
 
-A retrieval-augmented chatbot over five Air India PDFs (service regulations, fact
-sheet, route maps, disaster history). Built for **accuracy** and **low latency**
-(~3–5s/answer) on a **free** Gemini API tier, served as a **web app** (FastAPI + a
-simple chat UI), **Dockerized**, with per-IP **rate limiting**. Terminal version too.
+An **agentic** retrieval-augmented chatbot over five Air India PDFs (service regulations,
+fact sheet, route maps, disaster history). It answers grounded, cited questions **and**
+captures "interested" leads with **admin approval (human-in-the-loop)** via a **LangGraph**
+router. Built for **accuracy** and **low latency** (~3–5s/answer) on a **free** Gemini API
+tier, served as a **web app** (FastAPI + chat UI), **Dockerized**, with per-IP **rate
+limiting**. Terminal version too.
 
 ## Why RAG (not "stuff the PDF into the prompt")
 The corpus is ~120 pages / 6.5 MB — far too large to put in every prompt, and the
@@ -20,9 +22,10 @@ route MAPS ─► Gemini Vision ─► structured routes ───────�
                                                               ▼
                           Gemini embeddings ─► Chroma (vectors) + BM25 (keywords)
 
-query ─► history-aware rewrite ─► hybrid retrieve ─► rerank ─► Gemini 2.5 Flash ─► answer + citations
-                 ▲                                                                      │
-                 └──────────────── SQLite windowed memory (per session) ◄──────────────┘
+message ─► LangGraph router ─┬─► RAG: history-aware rewrite ─► hybrid retrieve ─► rerank ─► Gemini ─► answer + citations
+                             └─► Lead capture: collect name/contact/routes ─► pending ─► admin /admin approves ─► interested list
+                 ▲
+                 └──────────────── LangGraph SQLite checkpointer (memory, per session) ◄──────────────
 ```
 
 ## Models
@@ -72,9 +75,20 @@ docker build -t air-india-chatbot .
 docker run -p 8000:8000 --env-file .env air-india-chatbot   # http://127.0.0.1:8000
 ```
 
+## Interested leads (agentic + human-in-the-loop)
+Say something like *"add me to your interested list"* and the bot collects your **name,
+contact, and routes** over a few turns, saving a **pending** lead. An admin reviews and
+approves them:
+```
+open http://127.0.0.1:8000/admin     # enter ADMIN_TOKEN (from .env) -> Approve / Reject
+```
+Approved leads move to the interested list. (Routing between Q&A and lead capture is done
+by a LangGraph router.)
+
 ## Safety / abuse protection
 - Per-IP **rate limit** (12 req/min) and **1000-char input cap** on `/chat`.
 - Runs as a **non-root** container; API key only via env at runtime.
+- Admin page is **token-protected** (`ADMIN_TOKEN` in `.env`).
 - Tunable in `config.py` (`RATE_LIMIT_*`, `MAX_MESSAGE_CHARS`).
 
 ## Evaluate (regression guard)
@@ -87,19 +101,21 @@ python scripts/eval.py              # runs the golden-question set (5/5)
 main.py              entry point -> terminal chat
 Dockerfile           container image (index + reranker baked in)
 DEPLOY.md            Docker + AWS EC2 deployment guide
-src/server.py        FastAPI web server (UI + streaming /chat + rate limiting)
+src/server.py        FastAPI server (UI + /chat via graph + rate limiting + admin endpoints)
 static/index.html    web chat UI (AIR INDIA CHAT BOT)
-config.py            paths, model names, knobs, rate-limit settings
+static/admin.html    admin page to approve/reject leads (token-protected)
+config.py            paths, model names, knobs, rate-limit + ADMIN_TOKEN
 src/maps_extract.py  Gemini Vision route extraction
 src/clean.py         per-source text cleaning
 src/loaders.py       PDF loading + structure-aware chunking
 src/embeddings.py    Gemini embeddings (rate-limited, task-type aware)
 src/ingest.py        build Chroma + BM25
-src/lc_chain.py      LangChain RAG chain: EnsembleRetriever + CrossEncoder rerank +
-                     history-aware retrieval + RunnableWithMessageHistory (SQL memory)
+src/lc_chain.py      RAG chain: EnsembleRetriever + CrossEncoder rerank + history-aware + grounding
+src/graph.py         LangGraph agent: router + RAG node + lead-capture node (SQLite checkpointer)
+src/leads.py         interested-list storage (pending / approved)
 src/lc_cli.py        chat loop used by main.py
 scripts/test_key.py  key smoke test
-scripts/eval.py      golden-set evaluation (runs through the LangChain chain)
+scripts/eval.py      golden-set evaluation (5/5)
 ```
 
 ## Known limits

@@ -9,13 +9,18 @@ venv/
 env/
 *.egg-info/
 
-# Vector store / local data
+# Vector store / search index (built locally, never committed)
 chroma_db/
 *.faiss
 *.pkl
-# runtime conversation memory (not for repo)
+
+# Databases / runtime state — never commit (chat history, graph state, leads, vector DB)
+# *.sqlite* also covers SQLite's -wal / -shm sidecar files.
+*.sqlite*
+*.db
 data/chat_history.sqlite
-*.sqlite
+data/graph_state.sqlite
+data/leads.sqlite
 
 # Source PDFs — not committed (copyright). Add your own locally to build the index.
 *.pdf

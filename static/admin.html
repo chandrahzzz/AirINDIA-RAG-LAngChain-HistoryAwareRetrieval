@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Air India — Lead Approvals</title>
+  <style>
+    :root { --ai-red:#b11226; --ai-gold:#c8a45c; --bg:#f4f4f6; --border:#e3e3e7; }
+    * { box-sizing:border-box; }
+    body { font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg);
+           margin:0; color:#1d1d1f; }
+    header { background:var(--ai-red); color:#fff; padding:16px 22px; border-bottom:3px solid var(--ai-gold); }
+    header h1 { margin:0; font-size:18px; letter-spacing:1.5px; }
+    .wrap { max-width:1000px; margin:24px auto; padding:0 16px; }
+    .bar { display:flex; gap:8px; align-items:center; margin-bottom:18px; }
+    .bar input { flex:1; max-width:360px; padding:9px 12px; border:1px solid var(--border); border-radius:8px; }
+    button { background:var(--ai-red); color:#fff; border:none; border-radius:8px; padding:9px 16px; cursor:pointer; }
+    button.sec { background:#fff; color:var(--ai-red); border:1px solid var(--ai-red); }
+    button.gray { background:#888; }
+    h2 { font-size:15px; color:#444; margin:22px 0 8px; }
+    table { width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); font-size:14px; }
+    th { background:#fafafa; font-size:12px; letter-spacing:.5px; text-transform:uppercase; color:#666; }
+    .empty { color:#888; padding:14px; font-size:14px; }
+    .actions { display:flex; gap:6px; }
+  </style>
+</head>
+<body>
+  <header><h1>AIR INDIA — INTERESTED LEAD APPROVALS</h1></header>
+  <div class="wrap">
+    <div class="bar">
+      <input id="token" type="password" placeholder="Admin token" />
+      <button onclick="load()">Load</button>
+    </div>
+
+    <h2>Pending (awaiting your approval)</h2>
+    <table id="pending"><thead><tr><th>ID</th><th>Name</th><th>Contact</th><th>Routes</th><th>Action</th></tr></thead><tbody></tbody></table>
+    <div id="pending-empty" class="empty" style="display:none">No pending leads.</div>
+
+    <h2>Approved (interested list)</h2>
+    <table id="approved"><thead><tr><th>ID</th><th>Name</th><th>Contact</th><th>Routes</th></tr></thead><tbody></tbody></table>
+    <div id="approved-empty" class="empty" style="display:none">No approved leads yet.</div>
+  </div>
+
+  <script>
+    const tokenEl = document.getElementById("token");
+    function tok(){ const t = tokenEl.value.trim(); localStorage.setItem("ai_admin", t); return t; }
+    tokenEl.value = localStorage.getItem("ai_admin") || "";
+
+    async function load(){
+      const t = tok();
+      const res = await fetch("/admin/leads?token=" + encodeURIComponent(t));
+      if(!res.ok){ alert("Unauthorized — check the admin token."); return; }
+      const data = await res.json();
+      fill("pending", data.pending, true);
+      fill("approved", data.approved, false);
+    }
+
+    function fill(id, rows, withActions){
+      const tbody = document.querySelector("#"+id+" tbody");
+      tbody.innerHTML = "";
+      document.getElementById(id+"-empty").style.display = rows.length ? "none" : "block";
+      for(const r of rows){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r.id}</td><td>${esc(r.name)}</td><td>${esc(r.contact)}</td><td>${esc(r.routes)}</td>` +
+          (withActions ? `<td class="actions">
+             <button onclick="act(${r.id},'approve')">Approve</button>
+             <button class="gray" onclick="act(${r.id},'reject')">Reject</button></td>` : "");
+        tbody.appendChild(tr);
+      }
+    }
+    function esc(s){ return (s||"").replace(/[<>&]/g, c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c])); }
+
+    async function act(id, what){
+      const res = await fetch(`/admin/leads/${id}/${what}?token=` + encodeURIComponent(tok()), {method:"POST"});
+      if(!res.ok){ alert("Action failed (auth?)."); return; }
+      load();
+    }
+
+    if(tokenEl.value) load();
+  </script>
+</body>
+</html>

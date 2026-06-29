@@ -12,6 +12,10 @@ langchain-community>=0.4,<1
 langchain-google-genai>=4.2,<5      # ChatGoogleGenerativeAI
 langchain-chroma>=1.1,<2            # Chroma vector store integration
 
+# --- LangGraph (agentic flow: router + RAG + HITL lead capture) ---
+langgraph>=1.2,<2
+langgraph-checkpoint-sqlite>=3,<4   # persistent per-session graph state
+
 # --- LLM / embeddings provider (current SDK; used for Vision map extraction) ---
 google-genai>=1.0.0
 

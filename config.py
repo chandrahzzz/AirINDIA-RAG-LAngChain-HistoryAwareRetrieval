@@ -17,12 +17,16 @@ DATA_DIR = ROOT / "data"            # generated artifacts (extracted maps, etc.)
 CHROMA_DIR = ROOT / "chroma_db"     # persisted vector store
 BM25_PATH = DATA_DIR / "bm25.pkl"   # persisted keyword index
 HISTORY_DB = DATA_DIR / "chat_history.sqlite"  # conversation memory
+GRAPH_DB = DATA_DIR / "graph_state.sqlite"     # LangGraph checkpointer (per-session state)
+LEADS_DB = DATA_DIR / "leads.sqlite"           # interested-list leads (pending + approved)
 
 DATA_DIR.mkdir(exist_ok=True)
 
 # --- Secrets ---
 load_dotenv(ROOT / ".env")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "").strip()
+# Admin token guards the lead-approval page; override in .env for production.
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "change-me-admin").strip()
 
 # --- Models (verified available for this API key, June 2026) ---
 EMBED_MODEL = "gemini-embedding-001"     # text-embedding-004 not available to this key

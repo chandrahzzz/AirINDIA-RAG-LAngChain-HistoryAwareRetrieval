@@ -204,16 +204,22 @@ def smalltalk_reply(message: str) -> str | None:
     return None
 
 
-def build_chain():
+def build_llm() -> ChatGoogleGenerativeAI:
     config.require_key()
-    llm = ChatGoogleGenerativeAI(
+    return ChatGoogleGenerativeAI(
         model=config.CHAT_MODEL, temperature=0.2,
         google_api_key=config.GOOGLE_API_KEY,
-        max_retries=3,      # auto-retry transient 5xx with backoff (Fix 2)
+        max_retries=3,      # auto-retry transient 5xx with backoff
         timeout=60,         # don't hang forever on a stuck request
         thinking_budget=0,  # disable internal "thinking" — big latency cut, and the
                             # answers are grounded extraction so it doesn't help quality
     )
+
+
+def build_rag_chain(llm: ChatGoogleGenerativeAI | None = None):
+    """The retrieve -> grounded-answer chain, takes {input, chat_history} -> {answer, context}.
+    Reused both by the CLI (wrapped with memory) and the LangGraph RAG node."""
+    llm = llm or build_llm()
     retriever = _augmented_retriever()
 
     contextualize_prompt = ChatPromptTemplate.from_messages([
@@ -229,8 +235,12 @@ def build_chain():
         ("human", "{input}"),
     ])
     qa_chain = create_stuff_documents_chain(llm, qa_prompt, document_prompt=DOC_PROMPT)
-    rag_chain = create_retrieval_chain(history_aware, qa_chain)
+    return create_retrieval_chain(history_aware, qa_chain)
 
+
+def build_chain():
+    """RAG chain wrapped with SQLite windowed memory (used by the terminal CLI)."""
+    rag_chain = build_rag_chain()
     return RunnableWithMessageHistory(
         rag_chain,
         lambda sid: WindowedSQLHistory(sid, config.MEMORY_WINDOW_TURNS),

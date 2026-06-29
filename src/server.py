@@ -1,7 +1,8 @@
 """FastAPI web server for the Air India chatbot.
 
-Serves the chat UI (static/index.html) and a streaming /chat endpoint backed by
-the LangChain RAG chain. Conversation memory is per browser session_id.
+Serves the chat UI (static/index.html) and a /chat endpoint backed by the LangGraph
+agentic graph (RAG answers + interested-lead capture). Also serves an admin page to
+approve/reject captured leads (the human-in-the-loop gate). State is per session_id.
 
 Run:  python -m src.server      (then open http://127.0.0.1:8000)
 """
@@ -15,31 +16,33 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, PlainTextResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, StreamingResponse
+from langchain_core.messages import HumanMessage
 from pydantic import BaseModel
 
 import config
-from src import lc_chain
+from src import graph as graph_mod
+from src import lc_chain, leads
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
-_chain = None  # built at startup (loads reranker, connects index)
+_graph = None  # built at startup (loads reranker, connects index, compiles graph)
 
 
-def get_chain():
-    global _chain
-    if _chain is None:
+def get_graph():
+    global _graph
+    if _graph is None:
         config.require_key()
-        _chain = lc_chain.build_chain()
-    return _chain
+        _graph = graph_mod.build_graph()
+    return _graph
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Warm up at startup so the FIRST user question doesn't pay the ~10s
     # reranker-load / index-connect cold start.
-    print("Warming up the RAG chain (loading reranker, connecting index) ...")
-    get_chain()
+    print("Warming up the agentic graph (loading reranker, connecting index) ...")
+    get_graph()
     print("Ready -> http://127.0.0.1:8000")
     yield
 
@@ -114,44 +117,71 @@ def chat(req: ChatRequest, request: Request):
             status_code=429,
         )
 
-    chain = get_chain()
-    cfg = {"configurable": {"session_id": req.session_id}}
-
-    # Greetings/thanks skip the whole RAG pipeline -> instant reply.
+    # Greetings/thanks skip the whole pipeline -> instant reply.
     quick = lc_chain.smalltalk_reply(req.message)
     if quick is not None:
         return StreamingResponse(iter([quick]), media_type="text/plain; charset=utf-8")
 
+    graph = get_graph()
+    cfg = {"configurable": {"thread_id": req.session_id}}
+
     def generate():
-        # Up to 3 attempts. We only retry BEFORE any token has been sent, so the
-        # client never sees duplicated/garbled text. The LLM also retries 5xx
-        # internally (max_retries); this guards the streaming layer (Fix 2).
+        # The graph runs to completion (router -> rag or lead-capture), then we stream
+        # the final answer out in chunks. Retries transient 5xx before sending anything.
         for attempt in range(3):
-            emitted = False
             try:
-                for chunk in chain.stream({"input": req.message}, config=cfg):
-                    token = chunk.get("answer", "")
-                    if token:
-                        emitted = True
-                        yield token
-                return  # finished cleanly
+                state = graph.invoke({"messages": [HumanMessage(req.message)]}, config=cfg)
+                answer = state["messages"][-1].content or ""
+                for i in range(0, len(answer), 24):
+                    yield answer[i:i + 24]
+                return
             except Exception as e:  # noqa: BLE001
                 msg = str(e)
                 if _is_quota_error(msg):
-                    yield ("\n\n[The free Gemini quota for today has been reached. "
-                           "Please try again later.]")
-                    return
-                if emitted:
-                    # Already streamed part of the answer — can't safely restart.
-                    yield "\n\n[The connection was interrupted. Please resend your question.]"
+                    yield ("The free Gemini quota for today has been reached. "
+                           "Please try again later.")
                     return
                 if _is_transient(msg) and attempt < 2:
                     time.sleep(1.5 * (attempt + 1))  # backoff, then retry fresh
                     continue
-                yield f"\n\n[Sorry, something went wrong: {type(e).__name__}.]"
+                yield f"Sorry, something went wrong: {type(e).__name__}."
                 return
 
     return StreamingResponse(generate(), media_type="text/plain; charset=utf-8")
+
+
+# --- Admin: human-in-the-loop lead approval --------------------------------
+def _check_admin(token: str | None):
+    if token != config.ADMIN_TOKEN:
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return None
+
+
+@app.get("/admin")
+def admin_page():
+    return FileResponse(STATIC_DIR / "admin.html")
+
+
+@app.get("/admin/leads")
+def admin_leads(token: str = ""):
+    if (err := _check_admin(token)) is not None:
+        return err
+    fmt = lambda L: [vars(x) for x in L]  # noqa: E731
+    return {"pending": fmt(leads.list_pending()), "approved": fmt(leads.list_approved())}
+
+
+@app.post("/admin/leads/{lead_id}/approve")
+def admin_approve(lead_id: int, token: str = ""):
+    if (err := _check_admin(token)) is not None:
+        return err
+    return {"ok": leads.approve(lead_id)}
+
+
+@app.post("/admin/leads/{lead_id}/reject")
+def admin_reject(lead_id: int, token: str = ""):
+    if (err := _check_admin(token)) is not None:
+        return err
+    return {"ok": leads.reject(lead_id)}
 
 
 if __name__ == "__main__":

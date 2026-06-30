@@ -10,10 +10,11 @@ __pycache__/
 # Secrets — provided at runtime, never baked in
 .env
 
-# Not needed at runtime (index is pre-built and copied explicitly)
+# Not needed at runtime (index is pre-built and copied explicitly).
+# Exclude only the runtime DBs in data/ (incl. -wal/-shm) — but NOT chroma_db/chroma.sqlite3,
+# which IS the search index and must be baked in.
 *.pdf
-*.sqlite
-data/chat_history.sqlite
+data/*.sqlite*
 
 # Docs / meta
 *.md
